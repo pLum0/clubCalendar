@@ -6,7 +6,7 @@ clubCalendar is a Django 4.2 sports club event calendar with RSVP functionality,
 
 ## Running Commands
 
-**All management commands must be run inside the Docker container**, not on the host. Use:
+**All management commands must be run inside the Docker container**, not on the host. This includes `makemigrations`, `migrate`, and any file operations on migration files — running these on the host will cause permission issues since the Docker container owns the mounted volume files. Use:
 
 ```bash
 docker compose exec web python manage.py <command>
@@ -15,6 +15,7 @@ docker compose exec web python manage.py <command>
 Common commands:
 
 ```bash
+docker compose exec web python manage.py makemigrations
 docker compose exec web python manage.py migrate
 docker compose exec web python manage.py makemessages -l de
 docker compose exec web python manage.py compilemessages
