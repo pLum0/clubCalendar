@@ -413,11 +413,11 @@ function stripGuestLabel(val) {
 function toggleGuestRsvp() {
     var form = document.getElementById('guestRsvpForm');
     form.classList.toggle('open');
-    localStorage.setItem('guestRsvpOpen', form.classList.contains('open'));
 }
 
 if (localStorage.getItem('guestRsvpOpen') === 'true') {
     document.getElementById('guestRsvpForm').classList.add('open');
+    localStorage.removeItem('guestRsvpOpen');
 }
 
 var acInput = document.getElementById('otherPlayerInput');
@@ -483,21 +483,21 @@ function submitOtherRSVP(status) {
             headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken')},
             body: 'user_id=' + encodeURIComponent(match.id) + '&status=' + status + '&occurrence_date=' + encodeURIComponent(occurrenceDate)
         }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.success) location.reload(); else alert(d.error || "{% trans 'Failed to save RSVP' %}");
+            if (d.success) { localStorage.setItem('guestRsvpOpen', 'true'); location.reload(); } else alert(d.error || "{% trans 'Failed to save RSVP' %}");
         });
     } else if (status === 'remove') {
         fetch(buildUrl('/event/{{ event.id }}/guest-rsvp/'), {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken')},
             body: 'guest_name=' + encodeURIComponent(guestName) + '&action=remove&occurrence_date=' + encodeURIComponent(occurrenceDate)
-        }).then(function(r) { return r.json(); }).then(function(d) { if (d.success) location.reload(); });
+        }).then(function(r) { return r.json(); }).then(function(d) { if (d.success) { localStorage.setItem('guestRsvpOpen', 'true'); location.reload(); } });
     } else {
         fetch(buildUrl('/event/{{ event.id }}/guest-rsvp/'), {
             method: 'POST',
             headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken')},
             body: 'guest_name=' + encodeURIComponent(guestName) + '&status=' + status + '&occurrence_date=' + encodeURIComponent(occurrenceDate)
         }).then(function(r) { return r.json(); }).then(function(d) {
-            if (d.success) location.reload(); else alert(d.error || "{% trans 'Failed to add guest RSVP' %}");
+            if (d.success) { localStorage.setItem('guestRsvpOpen', 'true'); location.reload(); } else alert(d.error || "{% trans 'Failed to add guest RSVP' %}");
         });
     }
 }
