@@ -1393,6 +1393,20 @@ button:hover {
         width: 100%;
     }
 
+    .rsvp-buttons {
+        gap: 0.5rem;
+    }
+
+    .rsvp-btn {
+        flex: 1 1 0;
+        text-align: center;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .rsvp-btn.coming {
+        flex-basis: 100%;
+    }
+
     .week-header, .week-number {
         display: none;
     }
