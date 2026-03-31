@@ -695,6 +695,7 @@ button:hover {
 
 .rsvp-buttons {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
@@ -1380,6 +1381,18 @@ button:hover {
 }
 
 @media (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
+
+    .calendar-container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+    }
+
     .week-header, .week-number {
         display: none;
     }
