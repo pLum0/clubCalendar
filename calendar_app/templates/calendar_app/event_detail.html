@@ -1,0 +1,514 @@
+{% extends 'calendar_app/base.html' %}
+{% load i18n %}
+{% load recurrence_utils %}
+
+{% block title %}{{ event.title }} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="event-detail-container">
+    <a href="{% url 'calendar' %}" class="back-link">&laquo; {% trans "Back to Calendar" %}</a>
+    
+    {% if is_admin %}
+    <div class="admin-controls">
+        <h3>{% trans "Admin Controls" %}</h3>
+        <div class="admin-buttons">
+            <button type="button" class="admin-btn" onclick="openAdminModal('status')">{% trans "Edit Status" %}</button>
+            <button type="button" class="admin-btn" onclick="openAdminModal('time')">{% trans "Change Time" %}</button>
+        </div>
+    </div>
+    
+    <div class="admin-modal" id="adminModal">
+        <div class="admin-modal-content">
+            <button type="button" class="admin-modal-close" onclick="closeAdminModal()">&times;</button>
+            <h3 id="adminModalTitle"></h3>
+            <form id="adminForm" onsubmit="submitAdminForm(event)">
+                <div id="adminModalBody"></div>
+                <div class="admin-modal-actions">
+                    <button type="button" class="admin-btn secondary" onclick="closeAdminModal()">{% trans "Cancel" %}</button>
+                    <button type="submit" class="admin-btn">{% trans "Save" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="event-detail-card">
+        {% if is_cancelled %}
+        <div class="cancelled-banner">
+            <strong>{% trans "CANCELLED" %}</strong>
+            {% if cancel_reason %}<span>{{ cancel_reason }}</span>{% endif %}
+        </div>
+        {% elif cancel_reason %}
+        <div class="notice-banner">
+            <strong>{% trans "NOTICE" %}</strong>
+            <span>{{ cancel_reason }}</span>
+        </div>
+        {% endif %}
+        
+        {% if time_changed %}
+        <div class="notice-banner">
+            <strong>{% trans "TIME CHANGED" %}</strong>
+            <span>{% trans "The time for this occurrence has been modified." %}</span>
+        </div>
+        {% endif %}
+        
+        <h1>{% if is_cancelled %}<del>{% endif %}{{ event.title }}{% if is_cancelled %}</del>{% endif %}</h1>
+        
+        {% if event.recurrence %}
+        <span class="recurring-badge">{% trans "Recurring Event" %}</span>
+        {% endif %}
+        
+        <div class="event-info">
+            <div class="info-row">
+                <strong>{% trans "Date:" %}</strong> 
+                {% if occurrence_date and occurrence_date != event.date %}
+                    {{ occurrence_date|date:"l, F j, Y" }}
+                    <span class="original-date-hint">({% blocktrans with date=event.date|date:"M j, Y" %}recurring from {{ date }}{% endblocktrans %})</span>
+                {% else %}
+                    {{ event.date|date:"l, F j, Y" }}
+                {% endif %}
+            </div>
+            <div class="info-row">
+                <strong>{% trans "Time:" %}</strong> {{ start_time|time:"H:i" }}{% if end_time %} - {{ end_time|time:"H:i" }}{% endif %}
+            </div>
+            {% if event.location %}
+            <div class="info-row">
+                <strong>{% trans "Location:" %}</strong> {{ event.location }}
+            </div>
+            {% endif %}
+            {% if event.description %}
+            <div class="info-row">
+                <strong>{% trans "Description:" %}</strong>
+                <p>{{ event.description }}</p>
+            </div>
+            {% endif %}
+            {% if max_participants %}
+            <div class="info-row">
+                <strong>{% trans "Max Participants:" %}</strong> {{ max_participants }}
+            </div>
+            {% endif %}
+            {% if event.tags.all %}
+            <div class="info-row">
+                <strong>{% trans "Teams:" %}</strong>
+                <div class="event-tags-list">
+                    {% for tag in event.tags.all %}
+                        <span class="tag-badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% if event.recurrence %}
+            <div class="info-row">
+                <strong>{% trans "Repeats:" %}</strong> {{ event.recurrence|human_readable_recurrence }}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="rsvp-section">
+            <h2>{% trans "Your RSVP" %}</h2>
+            {% if not user_prefs.calendar_user %}
+            <p class="warning">{% trans "Please set your name and team in the calendar view to RSVP." %}</p>
+            {% else %}
+            <div class="rsvp-form">
+                <p>{% blocktrans with name=user_prefs.calendar_user.name team=user_prefs.calendar_user.team.name %}RSVPing as: <strong>{{ name }}</strong> ({{ team }}){% endblocktrans %}</p>
+                
+                <div class="rsvp-buttons">
+                    <button class="rsvp-btn coming {% if user_rsvp.status == 'coming' %}active{% endif %}" 
+                            onclick="submitRSVP('coming')">
+                        {% trans "Coming" %}
+                    </button>
+                    <button class="rsvp-btn maybe {% if user_rsvp.status == 'maybe' %}active{% endif %}"
+                            onclick="submitRSVP('maybe')">
+                        {% trans "Maybe" %}
+                    </button>
+                    <button class="rsvp-btn not-coming {% if user_rsvp.status == 'not_coming' %}active{% endif %}"
+                            onclick="submitRSVP('not_coming')">
+                        {% trans "Not Coming" %}
+                    </button>
+                </div>
+                
+                <div class="comment-section">
+                    <label for="rsvp-comment">{% trans "Comment (optional):" %}</label>
+                    <textarea id="rsvp-comment" rows="2" onblur="saveComment()">{{ user_rsvp.comment|default:"" }}</textarea>
+                </div>
+            </div>
+
+            <div class="guest-rsvp-section" id="guestRsvpSection">
+                <button type="button" class="guest-rsvp-toggle" onclick="toggleGuestRsvp()">{% trans "Add RSVP for someone else" %}</button>
+                <div class="guest-rsvp-form" id="guestRsvpForm">
+                    <div class="autocomplete-wrapper">
+                        <input type="text" id="otherPlayerInput" placeholder="{% trans 'Type a name...' %}" maxlength="100" autocomplete="off">
+                        <ul class="autocomplete-list" id="autocompleteList"></ul>
+                    </div>
+                    <div class="rsvp-buttons" id="otherRsvpButtons">
+                        <button class="rsvp-btn coming" onclick="submitOtherRSVP('coming')">{% trans "Coming" %}</button>
+                        <button class="rsvp-btn maybe" onclick="submitOtherRSVP('maybe')">{% trans "Maybe" %}</button>
+                        <button class="rsvp-btn not-coming" onclick="submitOtherRSVP('not_coming')">{% trans "Not Coming" %}</button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="rsvps-summary">
+            <h2>{% trans "Responses" %}</h2>
+            
+            <div class="rsvp-group">
+                <h3>{% blocktrans count counter=rsvps_by_status.coming|length %}Coming ({{ counter }}){% plural %}Coming ({{ counter }}){% endblocktrans %}</h3>
+                <ul class="rsvp-list">
+                    {% for rsvp in rsvps_by_status.coming %}
+                    <li>
+                        {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
+                        {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                        {% if max_participants and forloop.counter > max_participants %}<span class="waitlist-notice">({% trans "waitlist" %})</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                    {% for guest in guests_by_status.coming %}
+                    <li>
+                        {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                    </li>
+                    {% endfor %}
+                    {% if not rsvps_by_status.coming and not guests_by_status.coming %}
+                    <li class="empty">{% trans "No one yet" %}</li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="rsvp-group">
+                <h3>{% blocktrans count counter=rsvps_by_status.maybe|length %}Maybe ({{ counter }}){% plural %}Maybe ({{ counter }}){% endblocktrans %}</h3>
+                <ul class="rsvp-list">
+                    {% for rsvp in rsvps_by_status.maybe %}
+                    <li>
+                        {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
+                        {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                    {% for guest in guests_by_status.maybe %}
+                    <li>
+                        {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                    </li>
+                    {% endfor %}
+                    {% if not rsvps_by_status.maybe and not guests_by_status.maybe %}
+                    <li class="empty">{% trans "No one yet" %}</li>
+                    {% endif %}
+                </ul>
+            </div>
+            
+            <div class="rsvp-group">
+                <h3>{% blocktrans count counter=rsvps_by_status.not_coming|length %}Not Coming ({{ counter }}){% plural %}Not Coming ({{ counter }}){% endblocktrans %}</h3>
+                <ul class="rsvp-list">
+                    {% for rsvp in rsvps_by_status.not_coming %}
+                    <li>
+                        {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
+                        {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                    </li>
+                    {% endfor %}
+                    {% for guest in guests_by_status.not_coming %}
+                    <li>
+                        {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                    </li>
+                    {% endfor %}
+                    {% if not rsvps_by_status.not_coming and not guests_by_status.not_coming %}
+                    <li class="empty">{% trans "No one yet" %}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const occurrenceDate = "{{ occurrence_date|date:'Y-m-d' }}";
+const isCancelled = {{ is_cancelled|yesno:'true,false' }};
+const currentReason = "{{ cancel_reason|escapejs }}";
+const currentStartTime = "{{ start_time_str }}";
+const currentEndTime = "{{ end_time_str }}";
+const defaultStartTime = "{{ default_start_time_str }}";
+const defaultEndTime = "{{ default_end_time_str }}";
+let currentAdminAction = null;
+
+function openAdminModal(action) {
+    currentAdminAction = action;
+    const modal = document.getElementById('adminModal');
+    const title = document.getElementById('adminModalTitle');
+    const body = document.getElementById('adminModalBody');
+    
+    if (action === 'status') {
+        title.textContent = "{% trans 'Edit Status' %}";
+        body.innerHTML = `
+            <div class="form-group">
+                <label><input type="checkbox" id="cancelCheck" ${isCancelled ? 'checked' : ''}> {% trans "Cancel this occurrence" %}</label>
+            </div>
+            <div class="form-group">
+                <label for="statusReason">{% trans "Reason/Notice:" %}</label>
+                <textarea id="statusReason" rows="3">${currentReason}</textarea>
+                <p class="hint">{% trans "Optional. Shows as notice if not cancelled, or as cancellation reason if cancelled." %}</p>
+            </div>
+        `;
+    } else if (action === 'time') {
+        title.textContent = "{% trans "Change Time" %}";
+        body.innerHTML = `
+            <div class="form-group">
+                <label for="newStartTime">{% trans "Start Time:" %}</label>
+                <input type="text" id="newStartTime" value="${currentStartTime}" placeholder="HH:MM" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$" maxlength="5">
+                <span class="hint">{% trans "Original time:" %} ${defaultStartTime}</span>
+            </div>
+            <div class="form-group">
+                <label for="newEndTime">{% trans "End Time:" %}</label>
+                <input type="text" id="newEndTime" value="${currentEndTime}" placeholder="HH:MM" pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$" maxlength="5">
+                <span class="hint">{% trans "Original time:" %} ${defaultEndTime || "{% trans 'none' %}"}</span>
+            </div>
+        `;
+    }
+    
+    const actionsDiv = document.querySelector('.admin-modal-actions');
+    if (action === 'time') {
+        actionsDiv.innerHTML = `
+            <button type="button" class="admin-btn secondary" onclick="resetTimeToDefault()">{% trans "Reset" %}</button>
+            <button type="button" class="admin-btn secondary" onclick="closeAdminModal()">{% trans "Cancel" %}</button>
+            <button type="submit" class="admin-btn">{% trans "Save" %}</button>
+        `;
+    } else {
+        actionsDiv.innerHTML = `
+            <button type="button" class="admin-btn secondary" onclick="closeAdminModal()">{% trans "Cancel" %}</button>
+            <button type="submit" class="admin-btn">{% trans "Save" %}</button>
+        `;
+    }
+    
+    modal.classList.add('open');
+}
+
+function closeAdminModal() {
+    document.getElementById('adminModal').classList.remove('open');
+    currentAdminAction = null;
+}
+
+function resetTimeToDefault() {
+    document.getElementById('newStartTime').value = defaultStartTime;
+    document.getElementById('newEndTime').value = defaultEndTime;
+}
+
+function submitAdminForm(e) {
+    e.preventDefault();
+    
+    let data = `occurrence_date=${encodeURIComponent(occurrenceDate)}`;
+    
+    if (currentAdminAction === 'status') {
+        const cancelled = document.getElementById('cancelCheck').checked;
+        const reason = document.getElementById('statusReason').value;
+        data += `&cancelled=${cancelled}&reason=${encodeURIComponent(reason)}`;
+    } else if (currentAdminAction === 'time') {
+        const startTime = document.getElementById('newStartTime').value.trim();
+        const endTime = document.getElementById('newEndTime').value.trim();
+        
+        const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+        if (startTime && !timeRegex.test(startTime)) {
+            alert("{% trans 'Invalid start time format. Use HH:MM (e.g., 14:30)' %}");
+            return;
+        }
+        if (endTime && !timeRegex.test(endTime)) {
+            alert("{% trans 'Invalid end time format. Use HH:MM (e.g., 16:30)' %}");
+            return;
+        }
+        
+        data += `&cancelled=${isCancelled}&reason=${encodeURIComponent(currentReason)}`;
+        if (startTime) data += `&start_time=${encodeURIComponent(startTime)}`;
+        if (endTime) data += `&end_time=${encodeURIComponent(endTime)}`;
+    }
+    
+    fetch(buildUrl('/event/{{ event.id }}/update-occurrence/'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: data
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || "{% trans 'Failed to update' %}");
+        }
+    });
+}
+
+function submitRSVP(status) {
+    const userId = "{{ user_prefs.calendar_user.id|escapejs }}";
+    const comment = document.getElementById('rsvp-comment').value;
+    const activeBtn = document.querySelector('.rsvp-btn.active');
+    const currentStatus = activeBtn ? (activeBtn.classList.contains('coming') ? 'coming' :
+                       activeBtn.classList.contains('maybe') ? 'maybe' : 'not_coming') : null;
+    
+    if (currentStatus === status) {
+        status = 'remove';
+    }
+    
+    fetch(buildUrl('/event/{{ event.id }}/rsvp/'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `user_id=${encodeURIComponent(userId)}&status=${status}&comment=${encodeURIComponent(comment)}&occurrence_date=${encodeURIComponent(occurrenceDate)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function saveComment() {
+    const activeBtn = document.querySelector('.rsvp-btn.active');
+    if (activeBtn) {
+        const status = activeBtn.classList.contains('coming') ? 'coming' :
+                       activeBtn.classList.contains('maybe') ? 'maybe' : 'not_coming';
+        const userId = "{{ user_prefs.calendar_user.id|escapejs }}";
+        const comment = document.getElementById('rsvp-comment').value;
+        
+        fetch(buildUrl('/event/{{ event.id }}/rsvp/'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `user_id=${encodeURIComponent(userId)}&status=${status}&comment=${encodeURIComponent(comment)}&occurrence_date=${encodeURIComponent(occurrenceDate)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+
+{{ other_players_data|json_script:"known-players-data" }}
+{{ all_users_data|json_script:"all-users-data" }}
+{{ guests_data|json_script:"guests-data" }}
+<script>
+var knownPlayers = JSON.parse(document.getElementById('known-players-data').textContent);
+var allUsers = JSON.parse(document.getElementById('all-users-data').textContent);
+var guestRSVPs = JSON.parse(document.getElementById('guests-data').textContent);
+var guestLabel = "{% trans 'Guest' %}";
+
+var guestSuggestions = Object.keys(guestRSVPs).map(function(name) { return {value: name + ' (' + guestLabel + ')', type: 'guest'}; });
+var teamSuggestions = knownPlayers.map(function(p) { return {value: p.label, type: 'player', data: p}; }).concat(guestSuggestions);
+var allSuggestions = allUsers.map(function(p) { return {value: p.label, type: 'player', data: p}; }).concat(guestSuggestions);
+
+function statusToClass(s) { return s === 'not_coming' ? 'not-coming' : s; }
+
+function stripGuestLabel(val) {
+    var suffix = ' (' + guestLabel + ')';
+    if (val.slice(-suffix.length) === suffix) return val.slice(0, -suffix.length);
+    return val;
+}
+
+function toggleGuestRsvp() {
+    var form = document.getElementById('guestRsvpForm');
+    form.classList.toggle('open');
+    localStorage.setItem('guestRsvpOpen', form.classList.contains('open'));
+}
+
+if (localStorage.getItem('guestRsvpOpen') === 'true') {
+    document.getElementById('guestRsvpForm').classList.add('open');
+}
+
+var acInput = document.getElementById('otherPlayerInput');
+var acList = document.getElementById('autocompleteList');
+
+acInput.addEventListener('input', function() {
+    updateOtherRsvpButtons();
+    showSuggestions(this.value.trim());
+});
+acInput.addEventListener('focus', function() { showSuggestions(this.value.trim()); });
+acInput.addEventListener('blur', function() { setTimeout(function() { acList.style.display = 'none'; }, 150); });
+
+function showSuggestions(val) {
+    var lower = val.toLowerCase();
+    var matches = lower
+        ? allSuggestions.filter(function(s) { return s.value.toLowerCase().indexOf(lower) !== -1; })
+            .sort(function(a, b) { return a.value.toLowerCase().indexOf(lower) - b.value.toLowerCase().indexOf(lower); })
+        : teamSuggestions;
+    if (!matches.length) { acList.innerHTML = ''; acList.style.display = 'none'; return; }
+    acList.innerHTML = matches.map(function(s) {
+        return '<li data-value="' + s.value.replace(/"/g, '&quot;') + '">' + s.value + '</li>';
+    }).join('');
+    acList.style.display = 'block';
+    acList.querySelectorAll('li').forEach(function(li) {
+        li.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            acInput.value = this.dataset.value;
+            acList.innerHTML = '';
+            acList.style.display = 'none';
+            updateOtherRsvpButtons();
+        });
+    });
+}
+
+function updateOtherRsvpButtons() {
+    var input = acInput.value.trim();
+    var container = document.getElementById('otherRsvpButtons');
+    container.querySelectorAll('.rsvp-btn').forEach(function(b) { b.classList.remove('active'); });
+    if (!input) return;
+    var match = knownPlayers.find(function(p) { return p.label === input; });
+    if (match && match.status) {
+        container.querySelector('.rsvp-btn.' + statusToClass(match.status)).classList.add('active');
+    } else {
+        var gn = stripGuestLabel(input);
+        if (guestRSVPs[gn]) {
+            container.querySelector('.rsvp-btn.' + statusToClass(guestRSVPs[gn])).classList.add('active');
+        }
+    }
+}
+
+function submitOtherRSVP(status) {
+    var input = acInput.value.trim();
+    if (!input) { alert("{% trans 'Please enter a name.' %}"); return; }
+    var match = knownPlayers.find(function(p) { return p.label === input; });
+    var activeBtn = document.querySelector('#otherRsvpButtons .rsvp-btn.active');
+    var currentStatus = activeBtn ? (activeBtn.classList.contains('coming') ? 'coming' :
+        activeBtn.classList.contains('maybe') ? 'maybe' : 'not_coming') : null;
+    if (currentStatus === status) status = 'remove';
+    var guestName = stripGuestLabel(input);
+    if (match) {
+        fetch(buildUrl('/event/{{ event.id }}/rsvp/'), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken')},
+            body: 'user_id=' + encodeURIComponent(match.id) + '&status=' + status + '&occurrence_date=' + encodeURIComponent(occurrenceDate)
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) location.reload(); else alert(d.error || "{% trans 'Failed to save RSVP' %}");
+        });
+    } else if (status === 'remove') {
+        fetch(buildUrl('/event/{{ event.id }}/guest-rsvp/'), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken')},
+            body: 'guest_name=' + encodeURIComponent(guestName) + '&action=remove&occurrence_date=' + encodeURIComponent(occurrenceDate)
+        }).then(function(r) { return r.json(); }).then(function(d) { if (d.success) location.reload(); });
+    } else {
+        fetch(buildUrl('/event/{{ event.id }}/guest-rsvp/'), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCookie('csrftoken')},
+            body: 'guest_name=' + encodeURIComponent(guestName) + '&status=' + status + '&occurrence_date=' + encodeURIComponent(occurrenceDate)
+        }).then(function(r) { return r.json(); }).then(function(d) {
+            if (d.success) location.reload(); else alert(d.error || "{% trans 'Failed to add guest RSVP' %}");
+        });
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('adminModal');
+        if (modal && modal.classList.contains('open')) {
+            closeAdminModal();
+        }
+    }
+});
+</script>
+{% endblock %}

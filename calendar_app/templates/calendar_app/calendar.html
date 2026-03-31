@@ -1,0 +1,257 @@
+{% extends 'calendar_app/base.html' %}
+{% load static calendar_tags i18n %}
+
+{% block content %}
+<div class="calendar-container">
+    <div class="sidebar">
+        <div class="user-settings">
+            <h3>{% trans "Your Settings" %}</h3>
+            
+            {% if user_prefs.calendar_user %}
+            <div class="logged-in-info">
+                <p class="user-greeting">{% blocktrans with name=user_prefs.calendar_user.name team=user_prefs.calendar_user.team.name %}Logged in as: <strong>{{ name }}</strong> ({{ team }}){% endblocktrans %}</p>
+                <button type="button" class="logout-btn" onclick="logout()">{% trans "Logout" %}</button>
+            </div>
+            
+            <div class="notification-settings">
+                <label for="ntfy-topic">
+                    {% trans "Push notifications (optional):" %}
+                    <span class="info-icon" onclick="toggleNtfyInfo()">ⓘ</span>
+                </label>
+                <div id="ntfy-info" class="ntfy-info-box" style="display: none;">
+                    <p>{% trans "Get push notifications via ntfy - a free, open-source notification service." %}</p>
+                    <p>{% trans "How to use:" %}</p>
+                    <ol>
+                        <li>{% trans "Install the ntfy app:" %}
+                            <ul>
+                                <li><a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Google Play</a></li>
+                                <li><a href="https://f-droid.org/packages/io.heckel.ntfy/" target="_blank" rel="noopener">F-Droid</a></li>
+                                <li><a href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank" rel="noopener">Apple App Store</a></li>
+                            </ul>
+                        </li>
+                        <li>{% trans "Choose a unique topic name and enter it above" %}</li>
+                        <li>{% trans "Subscribe to the same topic in the app" %}</li>
+                    </ol>
+                    <p><strong>{% trans "Note:" %}</strong> {% trans "If you enter just a topic name (e.g., 'mytopic'), the public ntfy.sh server will be used. You can also enter a full URL to use any ntfy server (e.g., 'https://ntfy.example.com/mytopic')." %}</p>
+                </div>
+                <input type="text" id="ntfy-topic" value="{{ user_prefs.calendar_user.ntfy_topic|default:'' }}" placeholder="{% trans 'e.g., mytopic or https://ntfy.example.com/mytopic' %}" onblur="saveNtfyTopic()">
+            </div>
+            {% else %}
+            <label for="user-name">{% trans "Your Name:" %}</label>
+            <input type="text" id="user-name" value="" placeholder="{% trans 'Enter your name' %}" list="existing-names">
+            <datalist id="existing-names"></datalist>
+            
+            <label for="user-team">{% trans "Your Team:" %}</label>
+            <select id="user-team" onchange="updateNameSuggestions(); document.getElementById('login-info-box').style.display = this.value ? 'block' : 'none';">
+                <option value="">{% trans "Select your team" %}</option>
+                {% for tag in tags %}
+                <option value="{{ tag.id }}">{{ tag.name }}</option>
+                {% endfor %}
+            </select>
+            <div class="login-info-box" id="login-info-box" style="display: none;">
+                <p>{% trans "Team selection is for display only — you can RSVP to <strong>any</strong> event. Please create only <strong>one</strong> account for your name, even if you play in multiple teams." %}</p>
+            </div>
+            
+            <button type="button" class="save-user-btn" onclick="login()">{% trans "Login" %}</button>
+            {% endif %}
+        </div>
+        
+        <div class="tag-filter">
+            <h3>{% trans "Filter by Team" %}</h3>
+            <div class="tags-list">
+                {% for tag in tags %}
+                <label class="tag-checkbox">
+                    <input type="checkbox" value="{{ tag.name }}" 
+                           {% if tag.name in user_prefs.preferred_tags %}checked{% endif %}
+                           onchange="updateFilter()">
+                    <span class="tag-badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                </label>
+                {% endfor %}
+            </div>
+            <button onclick="clearFilter()">{% trans "Clear Filter" %}</button>
+        </div>
+    </div>
+    
+    <div class="calendar-main" id="calendar">
+        <div class="calendar-header">
+            <a href="?month={{ prev_month }}&year={{ prev_year }}{% if tag_filter %}&tags={{ tag_filter }}{% endif %}#calendar" class="nav-btn">&laquo; {% trans "Prev" %}</a>
+            <h2>{{ month_name }} {{ year }}</h2>
+            <a href="?month={{ next_month }}&year={{ next_year }}{% if tag_filter %}&tags={{ tag_filter }}{% endif %}#calendar" class="nav-btn">{% trans "Next" %} &raquo;</a>
+        </div>
+        
+        <div class="calendar-grid">
+            <div class="calendar-weekdays">
+                <div class="week-header"></div>
+                <div>{% trans "Mon" %}</div>
+                <div>{% trans "Tue" %}</div>
+                <div>{% trans "Wed" %}</div>
+                <div>{% trans "Thu" %}</div>
+                <div>{% trans "Fri" %}</div>
+                <div>{% trans "Sat" %}</div>
+                <div>{% trans "Sun" %}</div>
+            </div>
+            
+            <div class="calendar-days">
+                {% for week in calendar_data %}
+                    <div class="week-number">{{ week_numbers|get_item:forloop.counter0 }}</div>
+                    {% for day in week %}
+                        <div class="calendar-day {% if day == 0 %}empty{% elif year == today.year and month == today.month and day == today.day %}today{% endif %}">
+                            {% if day > 0 %}
+                                <div class="day-number">{{ day }}</div>
+                                {% if day in events_by_day %}
+                                    <div class="day-events">
+                                        {% for event in events_by_day|get_item:day %}
+                                            <a href="{% url 'event_detail' event.id %}?date={{ event.date|date:'Y-m-d' }}" class="event-link">
+                                                <div class="event-tooltip">
+                                                    {% if event.cancelled %}
+                                                    <div class="event-tooltip-cancelled">{% trans "CANCELLED" %}</div>
+                                                    {% endif %}
+                                                    <div class="event-tooltip-time">{{ event.date|date:'Y-m-d' }}, {{ event.start_time|time:'H:i' }}</div>
+                                                    <div class="event-tooltip-title">{{ event.title }}</div>
+                                                    <div class="event-tooltip-location">{{ event.location }}</div>
+                                                    {% if event.cancel_reason %}
+                                                    <div class="event-tooltip-reason{% if not event.cancelled %} notice{% endif %}">{% if event.cancelled %}{% trans "Reason" %}{% else %}{% trans "Notice" %}{% endif %}: {{ event.cancel_reason }}</div>
+                                                    {% endif %}
+                                                    {% if event.time_changed %}
+                                                    <div class="event-tooltip-time-change">{% trans "Time changed" %}: {{ event.start_time|time:"H:i" }}{% if event.end_time %} - {{ event.end_time|time:"H:i" }}{% endif %}</div>
+                                                    {% endif %}
+                                                    <div class="event-tooltip-count">{{ event.rsvp_count }} {% trans 'attending' %}</div>
+                                                </div>
+                                                <div class="event-mini{% if event.cancelled %} cancelled{% endif %}{% if event.user_rsvp_status %} rsvp-{{ event.user_rsvp_status }}{% endif %}">
+                                                    <span class="event-time">{% if event.cancelled %}<del>{% endif %}{{ event.start_time|time:"H:i" }}{% if event.cancelled %}</del>{% endif %}</span>
+                                                    <span class="event-title">{% if event.cancelled %}<del>{% endif %}{{ event.title }}{% if event.cancelled %}</del>{% endif %}</span>
+                                                    <div class="event-tags">
+                                                        {% for tag in event.tags %}
+                                                            <span class="mini-tag" style="background-color: {{ tag.color }}"></span>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ all_users|json_script:"all-users-data" }}
+<script>
+const allUsers = JSON.parse(document.getElementById('all-users-data').textContent);
+
+function updateNameSuggestions() {
+    const teamSelect = document.getElementById('user-team');
+    const datalist = document.getElementById('existing-names');
+    
+    if (!teamSelect || !datalist) return;
+    
+    const teamId = teamSelect.value;
+    datalist.innerHTML = '';
+    
+    if (teamId) {
+        const teamUsers = allUsers.filter(u => u.team_id == teamId);
+        teamUsers.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.name;
+            datalist.appendChild(option);
+        });
+    }
+}
+
+function login() {
+    const name = document.getElementById('user-name').value.trim();
+    const teamId = document.getElementById('user-team').value;
+    
+    if (!name) {
+        alert("{% trans 'Please enter your name' %}");
+        return;
+    }
+    if (!teamId) {
+        alert("{% trans 'Please select your team' %}");
+        return;
+    }
+    
+    fetch(buildUrl('/login/'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `name=${encodeURIComponent(name)}&team_id=${encodeURIComponent(teamId)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.error || "{% trans 'Failed to login' %}");
+        }
+    });
+}
+
+function saveNtfyTopic() {
+    const ntfyTopic = document.getElementById('ntfy-topic').value.trim();
+    
+    fetch(buildUrl('/user/settings/'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: `ntfy_topic=${encodeURIComponent(ntfyTopic)}`
+    })
+    .then(response => response.json());
+}
+
+function logout() {
+    const cookiePath = basePath ? `/${basePath}/` : '/';
+    document.cookie = `calendar_user_id=; max-age=0; path=${cookiePath}`;
+    location.reload();
+}
+
+function updateFilter() {
+    const selectedTags = [];
+    document.querySelectorAll('.tag-checkbox input:checked').forEach(cb => {
+        selectedTags.push(cb.value);
+    });
+    
+    const tagsString = selectedTags.join(',');
+    const cookiePath = basePath ? `/${basePath}/` : '/';
+    document.cookie = `preferred_tags=${encodeURIComponent(tagsString)}; max-age=${365*24*60*60}; path=${cookiePath}`;
+    
+    const params = new URLSearchParams(window.location.search);
+    if (selectedTags.length > 0) {
+        params.set('tags', tagsString);
+    } else {
+        params.delete('tags');
+    }
+    window.location.href = `${window.location.pathname}?${params.toString()}#calendar`;
+}
+
+function clearFilter() {
+    document.querySelectorAll('.tag-checkbox input').forEach(cb => cb.checked = false);
+    const cookiePath = basePath ? `/${basePath}/` : '/';
+    document.cookie = `preferred_tags=; max-age=0; path=${cookiePath}`;
+    const params = new URLSearchParams(window.location.search);
+    params.delete('tags');
+    window.location.href = `${window.location.pathname}?${params.toString()}#calendar`;
+}
+
+function toggleNtfyInfo() {
+    const infoBox = document.getElementById('ntfy-info');
+    if (infoBox) {
+        infoBox.style.display = infoBox.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateNameSuggestions();
+});
+</script>
+{% endblock %}

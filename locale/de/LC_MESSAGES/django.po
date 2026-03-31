@@ -1,0 +1,778 @@
+# German translation for clubCalendar
+# Copyright (C) 2026
+# This file is distributed under the MIT License.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: clubCalendar 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-31 11:57+0000\n"
+"PO-Revision-Date: 2026-03-20 10:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: calendar_app/admin.py:16
+#, fuzzy
+#| msgid "Cancel this occurrence"
+msgid "Select occurrence"
+msgstr "Diesen Termin absagen"
+
+#: calendar_app/admin.py:17
+msgid "Choose from upcoming occurrences (recurring events only)"
+msgstr ""
+
+#: calendar_app/admin.py:62
+#, fuzzy
+#| msgid "Please select your team"
+msgid "Please select an occurrence or enter a date."
+msgstr "Bitte wähle oder gib einen Namen ein."
+
+#: calendar_app/admin.py:135
+#, fuzzy
+#| msgid "Recurring Event"
+msgid "Recurring"
+msgstr "Wiederkehrender Termin"
+
+#: calendar_app/admin.py:171
+msgid "Cancel selected events"
+msgstr ""
+
+#: calendar_app/admin.py:182
+#, fuzzy
+#| msgid "Event cancelled: %(event_title)s"
+msgid "Uncancel selected events"
+msgstr "Veranstaltung abgesagt: %(event_title)s"
+
+#: calendar_app/admin.py:195
+msgid "User"
+msgstr ""
+
+#: calendar_app/notifications.py:58
+msgid "You're off the waitlist!"
+msgstr "Du bist von der Warteliste aufgerückt!"
+
+#: calendar_app/notifications.py:67
+#, python-format
+msgid ""
+"You have moved off the waitlist for '%(event_title)s' on %(date)s. You are "
+"now confirmed!"
+msgstr ""
+"Du bist für '%(event_title)s' am %(date)s von der Warteliste aufgerückt. Du "
+"bist nun bestätigt!"
+
+#: calendar_app/notifications.py:100
+#, python-format
+msgid "Event cancelled: %(event_title)s"
+msgstr "Veranstaltung abgesagt: %(event_title)s"
+
+#: calendar_app/notifications.py:101
+#, python-format
+msgid "'%(event_title)s' on %(date)s has been cancelled."
+msgstr "'%(event_title)s' am %(date)s wurde abgesagt."
+
+#: calendar_app/notifications.py:106
+#, python-format
+msgid "Reason: %(reason)s"
+msgstr "Grund: %(reason)s"
+
+#: calendar_app/notifications.py:109
+#, python-format
+msgid "Event restored: %(event_title)s"
+msgstr "Veranstaltung wiederhergestellt: %(event_title)s"
+
+#: calendar_app/notifications.py:110
+#, python-format
+msgid "'%(event_title)s' on %(date)s is no longer cancelled."
+msgstr "'%(event_title)s' am %(date)s ist nicht mehr abgesagt."
+
+#: calendar_app/notifications.py:116
+#, python-format
+msgid "Event notice: %(event_title)s"
+msgstr "Hinweis zur Veranstaltung: %(event_title)s"
+
+#: calendar_app/notifications.py:117
+#, python-format
+msgid ""
+"'%(event_title)s' on %(date)s has a notice:\n"
+"\n"
+"%(reason)s"
+msgstr ""
+"'%(event_title)s' am %(date)s hat einen Hinweis:\n"
+"\n"
+"%(reason)s"
+
+#: calendar_app/notifications.py:124
+#, python-format
+msgid "Time changed: %(event_title)s"
+msgstr "Zeit geändert: %(event_title)s"
+
+#: calendar_app/notifications.py:132
+#, python-format
+msgid ""
+"The time for '%(event_title)s' on %(date)s has been changed to %(time)s."
+msgstr ""
+"Die Zeit für '%(event_title)s' am %(date)s wurde auf %(time)s geändert."
+
+#: calendar_app/notifications.py:138
+#, python-format
+msgid "The time for '%(event_title)s' on %(date)s has been changed."
+msgstr "Die Zeit für '%(event_title)s' am %(date)s wurde geändert."
+
+#: calendar_app/notifications.py:144
+#, python-format
+msgid "Event modified: %(event_title)s"
+msgstr "Veranstaltung geändert: %(event_title)s"
+
+#: calendar_app/notifications.py:145
+#, python-format
+msgid "'%(event_title)s' on %(date)s has been modified."
+msgstr "'%(event_title)s' am %(date)s wurde geändert."
+
+#: calendar_app/templates/admin/base.html:28
+msgid "Skip to main content"
+msgstr ""
+
+#: calendar_app/templates/admin/base.html:43
+msgid "Welcome,"
+msgstr ""
+
+#: calendar_app/templates/admin/base.html:50
+#, fuzzy
+#| msgid "Location:"
+msgid "Documentation"
+msgstr "Ort:"
+
+#: calendar_app/templates/admin/base.html:54
+msgid "Change password"
+msgstr ""
+
+#: calendar_app/templates/admin/base.html:58
+msgid "Log out"
+msgstr ""
+
+#: calendar_app/templates/admin/base.html:70
+msgid "Breadcrumbs"
+msgstr ""
+
+#: calendar_app/templates/admin/base.html:73
+msgid "Home"
+msgstr ""
+
+#: calendar_app/templates/calendar_app/admin_wrapper.html:4
+#: calendar_app/templates/calendar_app/base.html:27
+#: calendar_app/templates/calendar_app/base.html:48
+msgid "Admin"
+msgstr "Administration"
+
+#: calendar_app/templates/calendar_app/base.html:25
+#: calendar_app/templates/calendar_app/base.html:46
+msgid "Calendar"
+msgstr "Kalender"
+
+#: calendar_app/templates/calendar_app/base.html:26
+#: calendar_app/templates/calendar_app/base.html:47
+msgid "Upcoming"
+msgstr "Anstehend"
+
+#: calendar_app/templates/calendar_app/calendar.html:8
+msgid "Your Settings"
+msgstr "Deine Einstellungen"
+
+#: calendar_app/templates/calendar_app/calendar.html:12
+#, python-format
+msgid "Logged in as: <strong>%(name)s</strong> (%(team)s)"
+msgstr "Angemeldet als: <strong>%(name)s</strong> (%(team)s)"
+
+#: calendar_app/templates/calendar_app/calendar.html:13
+msgid "Logout"
+msgstr "Abmelden"
+
+#: calendar_app/templates/calendar_app/calendar.html:18
+msgid "Push notifications (optional):"
+msgstr "Push-Benachrichtigungen (optional):"
+
+#: calendar_app/templates/calendar_app/calendar.html:22
+msgid ""
+"Get push notifications via ntfy - a free, open-source notification service."
+msgstr ""
+"Erhalte Push-Benachrichtigungen via ntfy - ein kostenloser, quelloffener "
+"Benachrichtigungsdienst."
+
+#: calendar_app/templates/calendar_app/calendar.html:23
+msgid "How to use:"
+msgstr "Anleitung:"
+
+#: calendar_app/templates/calendar_app/calendar.html:25
+msgid "Install the ntfy app:"
+msgstr "Installiere die ntfy-App:"
+
+#: calendar_app/templates/calendar_app/calendar.html:32
+msgid "Choose a unique topic name and enter it above"
+msgstr "Wähle einen einzigartigen Topic-Namen und gib ihn oben ein"
+
+#: calendar_app/templates/calendar_app/calendar.html:33
+msgid "Subscribe to the same topic in the app"
+msgstr "Abonniere dasselbe Topic in der App"
+
+#: calendar_app/templates/calendar_app/calendar.html:35
+msgid "Note:"
+msgstr "Hinweis:"
+
+#: calendar_app/templates/calendar_app/calendar.html:35
+msgid ""
+"If you enter just a topic name (e.g., 'mytopic'), the public ntfy.sh server "
+"will be used. You can also enter a full URL to use any ntfy server (e.g., "
+"'https://ntfy.example.com/mytopic')."
+msgstr ""
+"Wenn du nur einen Topic-Namen eingibst (z.B. 'meintopic'), wird der "
+"öffentliche ntfy.sh-Server verwendet. Du kannst auch eine vollständige URL "
+"eingeben, um einen beliebigen ntfy-Server zu nutzen (z.B. 'https://"
+"ntfy.example.com/meintopic')."
+
+#: calendar_app/templates/calendar_app/calendar.html:37
+msgid "e.g., mytopic or https://ntfy.example.com/mytopic"
+msgstr "z.B. meintopic oder https://ntfy.example.com/meintopic"
+
+#: calendar_app/templates/calendar_app/calendar.html:40
+msgid "Your Name:"
+msgstr "Dein Name:"
+
+#: calendar_app/templates/calendar_app/calendar.html:41
+msgid "Enter your name"
+msgstr "Gib deinen Namen ein"
+
+#: calendar_app/templates/calendar_app/calendar.html:44
+msgid "Your Team:"
+msgstr "Deine Mannschaft:"
+
+#: calendar_app/templates/calendar_app/calendar.html:46
+msgid "Select your team"
+msgstr "Wähle deine Mannschaft"
+
+#: calendar_app/templates/calendar_app/calendar.html:52
+msgid ""
+"Team selection is for display only — you can RSVP to <strong>any</strong> "
+"event. Please create only <strong>one</strong> account for your name, even "
+"if you play in multiple teams."
+msgstr ""
+"Die Mannschaftsauswahl dient nur zur Anzeige — du kannst dich für "
+"<strong>jeden</strong> Termin anmelden. Bitte erstelle nur <strong>ein</"
+"strong> Konto für deinen Namen, auch wenn du in mehreren Mannschaften "
+"spielst."
+
+#: calendar_app/templates/calendar_app/calendar.html:55
+msgid "Login"
+msgstr "Anmelden"
+
+#: calendar_app/templates/calendar_app/calendar.html:60
+msgid "Filter by Team"
+msgstr "Nach Mannschaft filtern"
+
+#: calendar_app/templates/calendar_app/calendar.html:71
+msgid "Clear Filter"
+msgstr "Filter löschen"
+
+#: calendar_app/templates/calendar_app/calendar.html:77
+msgid "Prev"
+msgstr "Zurück"
+
+#: calendar_app/templates/calendar_app/calendar.html:79
+msgid "Next"
+msgstr "Weiter"
+
+#: calendar_app/templates/calendar_app/calendar.html:85
+msgid "Mon"
+msgstr "Mo"
+
+#: calendar_app/templates/calendar_app/calendar.html:86
+msgid "Tue"
+msgstr "Di"
+
+#: calendar_app/templates/calendar_app/calendar.html:87
+msgid "Wed"
+msgstr "Mi"
+
+#: calendar_app/templates/calendar_app/calendar.html:88
+msgid "Thu"
+msgstr "Do"
+
+#: calendar_app/templates/calendar_app/calendar.html:89
+msgid "Fri"
+msgstr "Fr"
+
+#: calendar_app/templates/calendar_app/calendar.html:90
+msgid "Sat"
+msgstr "Sa"
+
+#: calendar_app/templates/calendar_app/calendar.html:91
+msgid "Sun"
+msgstr "So"
+
+#: calendar_app/templates/calendar_app/calendar.html:107
+#: calendar_app/templates/calendar_app/event_detail.html:38
+#: calendar_app/templates/calendar_app/upcoming.html:35
+msgid "CANCELLED"
+msgstr "ABGESAGT"
+
+#: calendar_app/templates/calendar_app/calendar.html:113
+msgid "Reason"
+msgstr "Grund"
+
+#: calendar_app/templates/calendar_app/calendar.html:113
+msgid "Notice"
+msgstr "Hinweis"
+
+#: calendar_app/templates/calendar_app/calendar.html:116
+msgid "Time changed"
+msgstr "Zeit geändert"
+
+#: calendar_app/templates/calendar_app/calendar.html:118
+msgid "attending"
+msgstr "dabei"
+
+#: calendar_app/templates/calendar_app/calendar.html:172
+msgid "Please enter your name"
+msgstr "Bitte gib deinen Namen ein"
+
+#: calendar_app/templates/calendar_app/calendar.html:176
+msgid "Please select your team"
+msgstr "Bitte wähle deine Mannschaft"
+
+#: calendar_app/templates/calendar_app/calendar.html:193
+msgid "Failed to login"
+msgstr "Anmeldung fehlgeschlagen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:9
+msgid "Back to Calendar"
+msgstr "Zurück zum Kalender"
+
+#: calendar_app/templates/calendar_app/event_detail.html:13
+msgid "Admin Controls"
+msgstr "Admin-Kontrollen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:15
+#: calendar_app/templates/calendar_app/event_detail.html:239
+msgid "Edit Status"
+msgstr "Status bearbeiten"
+
+#: calendar_app/templates/calendar_app/event_detail.html:16
+#: calendar_app/templates/calendar_app/event_detail.html:251
+msgid "Change Time"
+msgstr "Zeit ändern"
+
+#: calendar_app/templates/calendar_app/event_detail.html:27
+#: calendar_app/templates/calendar_app/event_detail.html:270
+#: calendar_app/templates/calendar_app/event_detail.html:275
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:28
+#: calendar_app/templates/calendar_app/event_detail.html:271
+#: calendar_app/templates/calendar_app/event_detail.html:276
+msgid "Save"
+msgstr "Speichern"
+
+#: calendar_app/templates/calendar_app/event_detail.html:43
+#: calendar_app/templates/calendar_app/upcoming.html:37
+msgid "NOTICE"
+msgstr "HINWEIS"
+
+#: calendar_app/templates/calendar_app/event_detail.html:50
+#: calendar_app/templates/calendar_app/upcoming.html:40
+msgid "TIME CHANGED"
+msgstr "ZEIT GEÄNDERT"
+
+#: calendar_app/templates/calendar_app/event_detail.html:51
+msgid "The time for this occurrence has been modified."
+msgstr "Die Zeit für diesen Termin wurde geändert."
+
+#: calendar_app/templates/calendar_app/event_detail.html:58
+msgid "Recurring Event"
+msgstr "Wiederkehrender Termin"
+
+#: calendar_app/templates/calendar_app/event_detail.html:63
+msgid "Date:"
+msgstr "Datum:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:66
+#, python-format
+msgid "recurring from %(date)s"
+msgstr "wiederkehrend vom %(date)s"
+
+#: calendar_app/templates/calendar_app/event_detail.html:72
+msgid "Time:"
+msgstr "Zeit:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:76
+msgid "Location:"
+msgstr "Ort:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:81
+msgid "Description:"
+msgstr "Beschreibung:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:87
+msgid "Max Participants:"
+msgstr "Max. Teilnehmer:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:92
+msgid "Teams:"
+msgstr "Mannschaften:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:102
+msgid "Repeats:"
+msgstr "Wiederholung:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:108
+msgid "Your RSVP"
+msgstr "Deine Teilnahme"
+
+#: calendar_app/templates/calendar_app/event_detail.html:110
+msgid "Please set your name and team in the calendar view to RSVP."
+msgstr ""
+"Bitte setze deinen Namen und deine Mannschaft in der Kalenderansicht, um "
+"teilzunehmen."
+
+#: calendar_app/templates/calendar_app/event_detail.html:113
+#, python-format
+msgid "RSVPing as: <strong>%(name)s</strong> (%(team)s)"
+msgstr "Angemeldet als: <strong>%(name)s</strong> (%(team)s)"
+
+#: calendar_app/templates/calendar_app/event_detail.html:118
+#: calendar_app/templates/calendar_app/event_detail.html:144
+msgid "Coming"
+msgstr "Komme"
+
+#: calendar_app/templates/calendar_app/event_detail.html:122
+#: calendar_app/templates/calendar_app/event_detail.html:145
+msgid "Maybe"
+msgstr "Vielleicht"
+
+#: calendar_app/templates/calendar_app/event_detail.html:126
+#: calendar_app/templates/calendar_app/event_detail.html:146
+msgid "Not Coming"
+msgstr "Komme nicht"
+
+#: calendar_app/templates/calendar_app/event_detail.html:131
+msgid "Comment (optional):"
+msgstr "Kommentar (optional):"
+
+#: calendar_app/templates/calendar_app/event_detail.html:137
+msgid "Add RSVP for someone else"
+msgstr "Anmeldung für jemand anderen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:140
+msgid "Type a name..."
+msgstr "Name eingeben..."
+
+#: calendar_app/templates/calendar_app/event_detail.html:154
+msgid "Responses"
+msgstr "Antworten"
+
+#: calendar_app/templates/calendar_app/event_detail.html:157
+#, python-format
+msgid "Coming (%(counter)s)"
+msgid_plural "Coming (%(counter)s)"
+msgstr[0] "Komme (%(counter)s)"
+msgstr[1] "Komme (%(counter)s)"
+
+#: calendar_app/templates/calendar_app/event_detail.html:163
+msgid "waitlist"
+msgstr "Warteliste"
+
+#: calendar_app/templates/calendar_app/event_detail.html:168
+#: calendar_app/templates/calendar_app/event_detail.html:188
+#: calendar_app/templates/calendar_app/event_detail.html:208
+#: calendar_app/templates/calendar_app/event_detail.html:399
+msgid "Guest"
+msgstr "Gast"
+
+#: calendar_app/templates/calendar_app/event_detail.html:172
+#: calendar_app/templates/calendar_app/event_detail.html:192
+#: calendar_app/templates/calendar_app/event_detail.html:212
+msgid "No one yet"
+msgstr "Noch niemand"
+
+#: calendar_app/templates/calendar_app/event_detail.html:178
+#, python-format
+msgid "Maybe (%(counter)s)"
+msgid_plural "Maybe (%(counter)s)"
+msgstr[0] "Vielleicht (%(counter)s)"
+msgstr[1] "Vielleicht (%(counter)s)"
+
+#: calendar_app/templates/calendar_app/event_detail.html:198
+#, python-format
+msgid "Not Coming (%(counter)s)"
+msgid_plural "Not Coming (%(counter)s)"
+msgstr[0] "Komme nicht (%(counter)s)"
+msgstr[1] "Komme nicht (%(counter)s)"
+
+#: calendar_app/templates/calendar_app/event_detail.html:242
+msgid "Cancel this occurrence"
+msgstr "Diesen Termin absagen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:245
+msgid "Reason/Notice:"
+msgstr "Grund/Hinweis:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:247
+msgid ""
+"Optional. Shows as notice if not cancelled, or as cancellation reason if "
+"cancelled."
+msgstr ""
+"Optional. Wird als Hinweis angezeigt, wenn nicht abgesagt, oder als "
+"Absagegrund wenn abgesagt."
+
+#: calendar_app/templates/calendar_app/event_detail.html:254
+msgid "Start Time:"
+msgstr "Startzeit:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:256
+#: calendar_app/templates/calendar_app/event_detail.html:261
+msgid "Original time:"
+msgstr "Ursprüngliche Zeit:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:259
+msgid "End Time:"
+msgstr "Endzeit:"
+
+#: calendar_app/templates/calendar_app/event_detail.html:261
+msgid "none"
+msgstr "keine"
+
+#: calendar_app/templates/calendar_app/event_detail.html:269
+msgid "Reset"
+msgstr "Zurücksetzen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:308
+msgid "Invalid start time format. Use HH:MM (e.g., 14:30)"
+msgstr "Ungültiges Format für Startzeit. Verwende HH:MM (z.B. 14:30)"
+
+#: calendar_app/templates/calendar_app/event_detail.html:312
+msgid "Invalid end time format. Use HH:MM (e.g., 16:30)"
+msgstr "Ungültiges Format für Endzeit. Verwende HH:MM (z.B. 16:30)"
+
+#: calendar_app/templates/calendar_app/event_detail.html:334
+msgid "Failed to update"
+msgstr "Aktualisierung fehlgeschlagen"
+
+#: calendar_app/templates/calendar_app/event_detail.html:473
+#, fuzzy
+#| msgid "Please enter your name"
+msgid "Please enter a name."
+msgstr "Bitte gib einen Namen ein."
+
+#: calendar_app/templates/calendar_app/event_detail.html:486
+#, fuzzy
+#| msgid "Failed to update"
+msgid "Failed to save RSVP"
+msgstr "Anmeldung konnte nicht gespeichert werden"
+
+#: calendar_app/templates/calendar_app/event_detail.html:500
+#, fuzzy
+#| msgid "Failed to update"
+msgid "Failed to add guest RSVP"
+msgstr "Gast-Anmeldung fehlgeschlagen"
+
+#: calendar_app/templates/calendar_app/upcoming.html:4
+#: calendar_app/templates/calendar_app/upcoming.html:8
+msgid "Upcoming Events"
+msgstr "Anstehende Termine"
+
+#: calendar_app/templates/calendar_app/upcoming.html:11
+msgid "Filter by Team:"
+msgstr "Nach Mannschaft filtern:"
+
+#: calendar_app/templates/calendar_app/upcoming.html:20
+msgid "Clear"
+msgstr "Löschen"
+
+#: calendar_app/templates/calendar_app/upcoming.html:54
+msgid "RSVPs"
+msgstr "Anmeldungen"
+
+#: calendar_app/templates/calendar_app/upcoming.html:58
+msgid "No upcoming events found."
+msgstr "Keine anstehenden Termine gefunden."
+
+#: calendar_app/templatetags/recurrence_utils.py:14
+msgid "Yearly"
+msgstr "Jährlich"
+
+#: calendar_app/templatetags/recurrence_utils.py:15
+msgid "Monthly"
+msgstr "Monatlich"
+
+#: calendar_app/templatetags/recurrence_utils.py:16
+msgid "Weekly"
+msgstr "Wöchentlich"
+
+#: calendar_app/templatetags/recurrence_utils.py:17
+msgid "Daily"
+msgstr "Täglich"
+
+#: calendar_app/templatetags/recurrence_utils.py:27
+#, fuzzy
+#| msgid "year"
+#| msgid_plural "year"
+msgid "year"
+msgstr "Jahr"
+
+#: calendar_app/templatetags/recurrence_utils.py:28
+#, fuzzy
+#| msgid "month"
+#| msgid_plural "month"
+msgid "month"
+msgstr "Monat"
+
+#: calendar_app/templatetags/recurrence_utils.py:29
+#, fuzzy
+#| msgid "week"
+#| msgid_plural "week"
+msgid "week"
+msgstr "Woche"
+
+#: calendar_app/templatetags/recurrence_utils.py:30
+#, fuzzy
+#| msgid "day"
+#| msgid_plural "day"
+msgid "day"
+msgstr "Tag"
+
+#: calendar_app/templatetags/recurrence_utils.py:31
+#, python-format
+msgid "Every %(interval)s %(unit)s"
+msgid_plural "Every %(interval)s %(unit)s"
+msgstr[0] "Alle %(interval)s %(unit)s"
+msgstr[1] "Alle %(interval)s %(unit)s"
+
+#: calendar_app/templatetags/recurrence_utils.py:40
+#: calendar_app/templatetags/recurrence_utils.py:63
+msgid "Monday"
+msgstr "Montag"
+
+#: calendar_app/templatetags/recurrence_utils.py:41
+#: calendar_app/templatetags/recurrence_utils.py:63
+msgid "Tuesday"
+msgstr "Dienstag"
+
+#: calendar_app/templatetags/recurrence_utils.py:42
+#: calendar_app/templatetags/recurrence_utils.py:63
+msgid "Wednesday"
+msgstr "Mittwoch"
+
+#: calendar_app/templatetags/recurrence_utils.py:43
+#: calendar_app/templatetags/recurrence_utils.py:63
+msgid "Thursday"
+msgstr "Donnerstag"
+
+#: calendar_app/templatetags/recurrence_utils.py:44
+#: calendar_app/templatetags/recurrence_utils.py:63
+msgid "Friday"
+msgstr "Freitag"
+
+#: calendar_app/templatetags/recurrence_utils.py:45
+#: calendar_app/templatetags/recurrence_utils.py:65
+msgid "Saturday"
+msgstr "Samstag"
+
+#: calendar_app/templatetags/recurrence_utils.py:46
+#: calendar_app/templatetags/recurrence_utils.py:65
+msgid "Sunday"
+msgstr "Sonntag"
+
+#: calendar_app/templatetags/recurrence_utils.py:62
+#, python-format
+msgid "on %(day)s"
+msgstr "am %(day)s"
+
+#: calendar_app/templatetags/recurrence_utils.py:64
+msgid "on weekdays"
+msgstr "an Wochentagen"
+
+#: calendar_app/templatetags/recurrence_utils.py:66
+msgid "on weekends"
+msgstr "am Wochenende"
+
+#: calendar_app/templatetags/recurrence_utils.py:68
+#, python-format
+msgid "on %(days)s"
+msgstr "am %(days)s"
+
+#: calendar_app/templatetags/recurrence_utils.py:72
+#, python-format
+msgid "on day %(days)s of the month"
+msgstr "am %(days)s. des Monats"
+
+#: calendar_app/templatetags/recurrence_utils.py:77
+#, python-format
+msgid "in %(months)s"
+msgstr "im %(months)s"
+
+#: calendar_app/templatetags/recurrence_utils.py:81
+msgid "(with some dates excluded)"
+msgstr "(mit einigen ausgeschlossenen Terminen)"
+
+#: calendar_project/settings.py:104
+msgid "English"
+msgstr "Englisch"
+
+#: calendar_project/settings.py:105
+msgid "German"
+msgstr "Deutsch"
+
+#~ msgid "Add Guest RSVP"
+#~ msgstr "Gast-Anmeldung hinzufügen"
+
+#~ msgid "RSVP on behalf of another player."
+#~ msgstr "Anmeldung für einen anderen Spieler."
+
+#~ msgid "Select player..."
+#~ msgstr "Spieler auswählen..."
+
+#~ msgid "January"
+#~ msgstr "Januar"
+
+#~ msgid "February"
+#~ msgstr "Februar"
+
+#~ msgid "March"
+#~ msgstr "März"
+
+#~ msgid "April"
+#~ msgstr "April"
+
+#~ msgid "May"
+#~ msgstr "Mai"
+
+#~ msgid "June"
+#~ msgstr "Juni"
+
+#~ msgid "July"
+#~ msgstr "Juli"
+
+#~ msgid "August"
+#~ msgstr "August"
+
+#~ msgid "September"
+#~ msgstr "September"
+
+#~ msgid "October"
+#~ msgstr "Oktober"
+
+#~ msgid "November"
+#~ msgstr "November"
+
+#~ msgid "December"
+#~ msgstr "Dezember"
+
+#~ msgid ""
+#~ "Get notified via ntfy when the event changes or you move off the waitlist"
+#~ msgstr ""
+#~ "Erhalte Benachrichtigungen per ntfy bei Änderungen oder wenn du von der "
+#~ "Warteliste aufrückst"

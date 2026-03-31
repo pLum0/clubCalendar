@@ -1,0 +1,103 @@
+{% extends 'calendar_app/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Upcoming Events" %} - {{ SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="upcoming-container">
+    <h1>{% trans "Upcoming Events" %}</h1>
+    
+    <div class="tag-filter-inline">
+        <strong>{% trans "Filter by Team:" %}</strong>
+        {% for tag in tags %}
+        <a href="?{% if tag_filter %}tags={{ tag_filter }}{% endif %}" 
+           class="tag-filter-btn {% if tag.name in tag_filter %}active{% endif %}"
+           onclick="toggleTag('{{ tag.name }}'); return false;">
+            {{ tag.name }}
+        </a>
+        {% endfor %}
+        {% if tag_filter %}
+        <a href="#" onclick="clearFilter(); return false;">{% trans "Clear" %}</a>
+        {% endif %}
+    </div>
+    
+    <div class="events-list">
+        {% for event in events %}
+        <a href="{% url 'event_detail' event.id %}?date={{ event.date|date:'Y-m-d' }}" class="event-card{% if event.cancelled %} cancelled{% endif %}{% if event.user_rsvp_status %} rsvp-{{ event.user_rsvp_status }}{% endif %}">
+            <div class="event-date-box">
+                <span class="weekday">{{ event.date|date:"D" }}</span>
+                <span class="day">{{ event.date|date:"d" }}</span>
+                <span class="month">{{ event.date|date:"M" }}</span>
+            </div>
+            <div class="event-details">
+                <h3>{% if event.cancelled %}<del>{% endif %}{{ event.title }}{% if event.cancelled %}</del>{% endif %}</h3>
+                {% if event.cancelled %}
+                <p class="cancelled-notice">{% trans "CANCELLED" %}{% if event.cancel_reason %}: {{ event.cancel_reason }}{% endif %}</p>
+                {% elif event.cancel_reason %}
+                <div class="notice-text"><strong>{% trans "NOTICE" %}:</strong> {{ event.cancel_reason }}</div>
+                {% endif %}
+                {% if event.time_changed %}
+                <div class="notice-text"><strong>{% trans "TIME CHANGED" %}</strong></div>
+                {% endif %}
+                <p class="event-time">{{ event.start_time|time:"H:i" }}{% if event.end_time %} - {{ event.end_time|time:"H:i" }}{% endif %}</p>
+                {% if event.location %}
+                <p class="event-location">{{ event.location }}</p>
+                {% endif %}
+                <div class="event-tags-inline">
+                    {% for tag in event.tags %}
+                    <span class="tag-badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="rsvp-count">
+                <span class="count">{{ event.rsvp_count }}</span>
+                <span class="label">{% trans "RSVPs" %}</span>
+            </div>
+        </a>
+        {% empty %}
+        <p class="no-events">{% trans "No upcoming events found." %}</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleTag(tagName) {
+    const params = new URLSearchParams(window.location.search);
+    let tags;
+    
+    if (params.get('tags')) {
+        tags = params.get('tags').split(',');
+    } else {
+        const cookieTags = getCookie('preferred_tags');
+        tags = cookieTags ? cookieTags.split(',') : [];
+    }
+    
+    const index = tags.indexOf(tagName);
+    if (index > -1) {
+        tags.splice(index, 1);
+    } else {
+        tags.push(tagName);
+    }
+    
+    const tagsString = tags.join(',');
+    const cookiePath = basePath ? `/${basePath}/` : '/';
+    document.cookie = `preferred_tags=${encodeURIComponent(tagsString)}; max-age=${365*24*60*60}; path=${cookiePath}`;
+    
+    if (tags.length > 0) {
+        params.set('tags', tagsString);
+    } else {
+        params.delete('tags');
+    }
+    
+    window.location.search = params.toString();
+}
+
+function clearFilter() {
+    const cookiePath = basePath ? `/${basePath}/` : '/';
+    document.cookie = `preferred_tags=; max-age=0; path=${cookiePath}`;
+    window.location.href = window.location.pathname;
+}
+</script>
+{% endblock %}
