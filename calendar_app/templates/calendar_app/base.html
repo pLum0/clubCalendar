@@ -42,24 +42,26 @@
             </form>
         </nav>
         <div class="mobile-menu" id="mobileMenu">
-            <button class="mobile-menu-close" onclick="toggleMenu()" aria-label="Close">&times;</button>
+            <div class="mobile-menu-header">
+                <form action="{% url 'set_language' %}" method="post" class="mobile-language-selector" id="mobile-language-form">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.path }}">
+                    <select name="language" onchange="submitLanguageChange(this.value, 'mobile-language-form')">
+                        {% get_current_language as LANGUAGE_CODE %}
+                        {% get_available_languages as LANGUAGES %}
+                        {% get_language_info_list for LANGUAGES as languages %}
+                        {% for language in languages %}
+                            <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                                {{ language.name_local }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+                <button class="mobile-menu-close" onclick="toggleMenu()" aria-label="Close">&times;</button>
+            </div>
             <a href="{% url 'calendar' %}" onclick="toggleMenu()">{% trans "Calendar" %}</a>
             <a href="{% url 'upcoming_events' %}" onclick="toggleMenu()">{% trans "Upcoming" %}</a>
             <a href="{% url 'admin_wrapper' %}" onclick="toggleMenu()">{% trans "Admin" %}</a>
-            <form action="{% url 'set_language' %}" method="post" class="mobile-language-selector" id="mobile-language-form">
-                {% csrf_token %}
-                <input name="next" type="hidden" value="{{ request.path }}">
-                <select name="language" onchange="submitLanguageChange(this.value, 'mobile-language-form')">
-                    {% get_current_language as LANGUAGE_CODE %}
-                    {% get_available_languages as LANGUAGES %}
-                    {% get_language_info_list for LANGUAGES as languages %}
-                    {% for language in languages %}
-                        <option value="{{ language.code }}"{% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                            {{ language.name_local }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </form>
         </div>
         <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMenu()"></div>
     </header>
