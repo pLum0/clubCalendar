@@ -1,0 +1,73 @@
+set dotenv-load
+
+man := "docker compose exec web python manage.py"
+
+[private]
+ensure-env:
+    @test -f .env || (echo "Error: .env file not found. Copy .env_example to .env first." && exit 1)
+
+# Start the stack in detached mode
+up: ensure-env
+    docker compose up -d
+
+# Stop the stack
+down:
+    docker compose down
+
+# View logs
+logs:
+    docker compose logs -f
+
+# Run Django management commands (pass command as argument)
+manage *args: ensure-env
+    docker compose exec web python manage.py {{ args }}
+
+# Run migrations
+migrate: ensure-env
+    {{ man }} migrate
+
+# Create migrations
+makemigrations: ensure-env
+    {{ man }} makemigrations
+
+# Create and apply migrations
+makemigrate: makemigrations migrate
+
+# Regenerate German translation messages
+makemessages: ensure-env
+    {{ man }} makemessages -l de
+
+# Compile translation messages
+compilemessages: ensure-env
+    {{ man }} compilemessages
+
+# Full i18n workflow: regenerate and compile
+i18n: makemessages compilemessages
+
+# Collect static files
+collectstatic: ensure-env
+    {{ man }} collectstatic --noinput
+
+# Run the test suite
+test: ensure-env
+    {{ man }} test calendar_app.tests --verbosity=2
+
+# Run a specific test module or class (pass as argument)
+test-only module: ensure-env
+    {{ man }} test {{ module }} --verbosity=2
+
+# Create a superuser
+createsuperuser: ensure-env
+    {{ man }} createsuperuser
+
+# Open a Django shell
+shell: ensure-env
+    docker compose exec web python manage.py shell
+
+# Install/check dependencies
+pip-freeze: ensure-env
+    docker compose exec web pip freeze
+
+# Build without starting
+build: ensure-env
+    docker compose build
