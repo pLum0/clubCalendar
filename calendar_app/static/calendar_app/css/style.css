@@ -168,85 +168,138 @@ main {
     margin-top: 1rem;
 }
 
-.notification-settings label {
-    display: block;
-    margin-bottom: 0.25rem;
+.ntfy-collapsible {
+    margin-top: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.ntfy-collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
     font-weight: 500;
     color: #2c3e50;
-}
-
-.notification-settings input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
-    font-size: 1rem;
-}
-
-.notification-settings input:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-.notification-settings .info-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: bold;
-    color: #667eea;
-    background: #eef0ff;
-    border-radius: 50%;
-    cursor: pointer;
-    vertical-align: middle;
     transition: background-color 0.2s;
 }
 
-.notification-settings .info-icon:hover {
-    background: #667eea;
-    color: white;
+.ntfy-collapsible-header:hover {
+    background: #eef0ff;
+    color: #667eea;
 }
 
-.notification-settings .ntfy-info-box {
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
+.ntfy-collapsible-header:hover,
+.ntfy-collapsible-header:hover .ntfy-collapsible-chevron {
+    transform: none;
+    box-shadow: none;
+}
+
+.ntfy-collapsible-chevron {
     font-size: 0.85rem;
-    line-height: 1.5;
+    transition: transform 0.2s;
 }
 
-.notification-settings .ntfy-info-box p {
-    margin: 0 0 0.5rem 0;
+.ntfy-collapsible-body {
+    display: none;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e0e0e0;
 }
 
-.notification-settings .ntfy-info-box ol {
+.ntfy-collapsible-body.open {
+    display: block;
+}
+
+.ntfy-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.ntfy-toggle-label input[type="checkbox"] {
+    width: auto;
     margin: 0;
+}
+
+.ntfy-collapsible-body p {
+    margin: 0 0 0.4rem 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.ntfy-collapsible-body ol {
+    margin: 0 0 0.75rem 0;
     padding-left: 1.25rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
 }
 
-.notification-settings .ntfy-info-box li {
-    margin-bottom: 0.25rem;
+.ntfy-collapsible-body li {
+    margin-bottom: 0.35rem;
 }
 
-.notification-settings .ntfy-info-box ul {
+.ntfy-collapsible-body ul {
     margin: 0.25rem 0 0.5rem 0;
     padding-left: 1rem;
     list-style-type: disc;
 }
 
-.notification-settings .ntfy-info-box a {
+.ntfy-collapsible-body a {
     color: #667eea;
     text-decoration: none;
 }
 
-.notification-settings .ntfy-info-box a:hover {
+.ntfy-collapsible-body a:hover {
     text-decoration: underline;
+}
+
+.ntfy-config {
+    display: none;
+    padding-top: 0.5rem;
+}
+
+.ntfy-config.open {
+    display: block;
+}
+
+.ntfy-config label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.ntfy-config select {
+    width: 100%;
+    padding: 0.4rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    background: white;
+}
+
+.ntfy-topic-url {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    word-break: break-all;
+    padding: 0.5rem;
+    background: #f0f0f0;
+    border-radius: 4px;
+    display: none;
+}
+
+.ntfy-topic-url.has-url {
+    display: block;
 }
 
 button {
@@ -915,98 +968,6 @@ button:hover {
     opacity: 1;
     transform: none;
     box-shadow: none;
-}
-
-.ntfy-section {
-    margin-top: 1rem;
-}
-
-.ntfy-section label {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-weight: 500;
-    color: #2c3e50;
-}
-
-.ntfy-section input {
-    width: 100%;
-    padding: 0.5rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    transition: border-color 0.2s;
-}
-
-.ntfy-section input:focus {
-    outline: none;
-    border-color: #667eea;
-}
-
-.ntfy-section small {
-    display: block;
-    margin-top: 0.25rem;
-    color: #7f8c8d;
-    font-size: 0.8rem;
-}
-
-.ntfy-section .info-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: bold;
-    color: #667eea;
-    background: #eef0ff;
-    border-radius: 50%;
-    cursor: pointer;
-    vertical-align: middle;
-    transition: background-color 0.2s;
-}
-
-.ntfy-section .info-icon:hover {
-    background: #667eea;
-    color: white;
-}
-
-.ntfy-info-box {
-    background: #f8f9fa;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 0.75rem 1rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-    line-height: 1.5;
-}
-
-.ntfy-info-box p {
-    margin: 0 0 0.5rem 0;
-}
-
-.ntfy-info-box ol {
-    margin: 0;
-    padding-left: 1.25rem;
-}
-
-.ntfy-info-box li {
-    margin-bottom: 0.25rem;
-}
-
-.ntfy-info-box ul {
-    margin: 0.25rem 0 0.5rem 0;
-    padding-left: 1rem;
-    list-style-type: disc;
-}
-
-.ntfy-info-box a {
-    color: #667eea;
-    text-decoration: none;
-}
-
-.ntfy-info-box a:hover {
-    text-decoration: underline;
 }
 
 .warning {

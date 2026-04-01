@@ -160,12 +160,26 @@ class UpdateUserSettingsTest(TestCase):
         self.user = CalendarUser.objects.create(name='Alice', team=self.team)
         self.url = _url('/user/settings/')
 
-    def test_update_ntfy_topic(self):
+    def test_update_ntfy_enabled(self):
         self.client.cookies['calendar_user_id'] = str(self.user.id)
-        resp = self.client.post(self.url, {'ntfy_topic': 'my-topic'})
+        resp = self.client.post(self.url, {'ntfy_enabled': 'true'})
         self.assertEqual(resp.status_code, 200)
         self.user.refresh_from_db()
-        self.assertEqual(self.user.ntfy_topic, 'my-topic')
+        self.assertTrue(self.user.ntfy_enabled)
+
+    def test_update_ntfy_server(self):
+        self.client.cookies['calendar_user_id'] = str(self.user.id)
+        resp = self.client.post(self.url, {'ntfy_enabled': 'true', 'ntfy_server': 'ntfy.sh'})
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertTrue(data['success'])
+        self.assertIn('ntfy_url', data)
+
+    def test_invalid_ntfy_server_rejected(self):
+        self.client.cookies['calendar_user_id'] = str(self.user.id)
+        resp = self.client.post(self.url, {'ntfy_server': 'evil.com'})
+        self.assertEqual(resp.status_code, 400)
+        self.assertIn('error', resp.json())
 
     def test_update_language(self):
         self.client.cookies['calendar_user_id'] = str(self.user.id)
@@ -174,19 +188,19 @@ class UpdateUserSettingsTest(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.user.language, 'de')
 
-    def test_invalid_ntfy_topic_rejected(self):
+    def test_invalid_ntfy_server_rejected(self):
         self.client.cookies['calendar_user_id'] = str(self.user.id)
-        resp = self.client.post(self.url, {'ntfy_topic': 'http://evil.com/topic'})
+        resp = self.client.post(self.url, {'ntfy_server': 'evil.com'})
         self.assertEqual(resp.status_code, 400)
         self.assertIn('error', resp.json())
 
     def test_not_logged_in(self):
-        resp = self.client.post(self.url, {'ntfy_topic': 'topic'})
+        resp = self.client.post(self.url, {'ntfy_enabled': 'true'})
         self.assertEqual(resp.status_code, 400)
 
     def test_invalid_user_cookie(self):
         self.client.cookies['calendar_user_id'] = '99999'
-        resp = self.client.post(self.url, {'ntfy_topic': 'topic'})
+        resp = self.client.post(self.url, {'ntfy_enabled': 'true'})
         self.assertEqual(resp.status_code, 400)
 
 

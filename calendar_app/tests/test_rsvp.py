@@ -234,7 +234,8 @@ class WaitlistPromotionTest(RSVPTestMixin, TestCase):
         user1 = self._create_user('User1')
         user2 = self._create_user('User2')
         user3 = self._create_user('User3')
-        user3.ntfy_topic = 'test-topic'
+        user3.ntfy_enabled = True
+        user3.ntfy_server = 'ntfy.sh'
         user3.save()
 
         self._create_rsvp(self.event, user1, 'coming')

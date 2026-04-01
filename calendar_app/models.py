@@ -18,7 +18,8 @@ class Tag(models.Model):
 class CalendarUser(models.Model):
     name = models.CharField(max_length=100)
     team = models.ForeignKey(Tag, on_delete=models.PROTECT, related_name='users')
-    ntfy_topic = models.CharField(max_length=255, blank=True, default='', help_text='ntfy.sh topic for push notifications')
+    ntfy_enabled = models.BooleanField(default=False, help_text='Enable push notifications via ntfy')
+    ntfy_server = models.CharField(max_length=255, blank=True, default='', help_text='ntfy server hostname (e.g., ntfy.sh)')
     language = models.CharField(max_length=10, blank=True, default='en', help_text='User language preference')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

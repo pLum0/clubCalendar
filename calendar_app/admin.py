@@ -193,7 +193,7 @@ class RSVPAdmin(admin.ModelAdmin):
 
 @admin.register(CalendarUser, site=custom_admin_site)
 class CalendarUserAdmin(admin.ModelAdmin):
-    list_display = ['name', 'team', 'language', 'ntfy_topic']
+    list_display = ['name', 'team', 'language', 'ntfy_enabled', 'ntfy_server']
     list_filter = ['team', 'language']
     search_fields = ['name', 'team__name']
     ordering = ['name', 'team']

@@ -13,28 +13,42 @@
                 <button type="button" class="logout-btn" onclick="logout()">{% trans "Logout" %}</button>
             </div>
             
-            <div class="notification-settings">
-                <label for="ntfy-topic">
-                    {% trans "Push notifications (optional):" %}
-                    <span class="info-icon" onclick="toggleNtfyInfo()">ⓘ</span>
-                </label>
-                <div id="ntfy-info" class="ntfy-info-box" style="display: none;">
+            <div class="ntfy-collapsible">
+                <button type="button" class="ntfy-collapsible-header" onclick="toggleNtfySection()">
+                    <span>{% trans "Push notifications" %}</span>
+                    <span class="ntfy-collapsible-chevron">▸</span>
+                </button>
+                <div id="ntfy-body" class="ntfy-collapsible-body">
                     <p>{% trans "Get push notifications via ntfy - a free, open-source notification service." %}</p>
-                    <p>{% trans "How to use:" %}</p>
+                    <p>{% trans "How to set up:" %}</p>
                     <ol>
-                        <li>{% trans "Install the ntfy app:" %}
+                        <li>
+                            <label class="ntfy-toggle-label">
+                                <input type="checkbox" id="ntfy-enabled" {% if user_prefs.calendar_user.ntfy_enabled %}checked{% endif %} onchange="saveNtfySettings()">
+                                {% trans "Enable notifications" %}
+                            </label>
+                        </li>
+                        <li>{% trans "Copy the topic URL shown below" %}</li>
+                        <li>{% trans "Install the ntfy app and subscribe to that URL:" %}
                             <ul>
                                 <li><a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Google Play</a></li>
                                 <li><a href="https://f-droid.org/packages/io.heckel.ntfy/" target="_blank" rel="noopener">F-Droid</a></li>
                                 <li><a href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank" rel="noopener">Apple App Store</a></li>
                             </ul>
                         </li>
-                        <li>{% trans "Choose a unique topic name and enter it above" %}</li>
-                        <li>{% trans "Subscribe to the same topic in the app" %}</li>
                     </ol>
-                    <p><strong>{% trans "Note:" %}</strong> {% trans "If you enter just a topic name (e.g., 'mytopic'), the public ntfy.sh server will be used. You can also enter a full URL to use any ntfy server (e.g., 'https://ntfy.example.com/mytopic')." %}</p>
+                    <div id="ntfy-config" class="ntfy-config{% if user_prefs.calendar_user.ntfy_enabled %} open{% endif %}">
+                        {% if NTFY_SERVERS|length > 1 %}
+                        <label for="ntfy-server">{% trans "Server:" %}</label>
+                        <select id="ntfy-server" onchange="saveNtfySettings()">
+                            {% for server in NTFY_SERVERS %}
+                            <option value="{{ server }}" {% if server == user_prefs.calendar_user.ntfy_server or server == 'ntfy.sh' and not user_prefs.calendar_user.ntfy_server %}selected{% endif %}>{{ server }}</option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
+                        <div id="ntfy-topic-url" class="ntfy-topic-url{% if user_prefs.ntfy_url %} has-url{% endif %}">{% if user_prefs.ntfy_url %}{{ user_prefs.ntfy_url }}{% endif %}</div>
+                    </div>
                 </div>
-                <input type="text" id="ntfy-topic" value="{{ user_prefs.calendar_user.ntfy_topic|default:'' }}" placeholder="{% trans 'e.g., mytopic or https://ntfy.example.com/mytopic' %}" onblur="saveNtfyTopic()">
             </div>
             {% else %}
             <label for="user-name">{% trans "Your Name:" %}</label>
@@ -195,8 +209,27 @@ function login() {
     });
 }
 
-function saveNtfyTopic() {
-    const ntfyTopic = document.getElementById('ntfy-topic').value.trim();
+function toggleNtfySection() {
+    const body = document.getElementById('ntfy-body');
+    const chevron = document.querySelector('.ntfy-collapsible-chevron');
+    body.classList.toggle('open');
+    chevron.textContent = body.classList.contains('open') ? '▾' : '▸';
+}
+
+function saveNtfySettings() {
+    const enabled = document.getElementById('ntfy-enabled').checked;
+    const configDiv = document.getElementById('ntfy-config');
+    const topicUrlDiv = document.getElementById('ntfy-topic-url');
+    const serverSelect = document.getElementById('ntfy-server');
+    const server = serverSelect ? serverSelect.value : 'ntfy.sh';
+
+    if (enabled) {
+        configDiv.classList.add('open');
+    } else {
+        configDiv.classList.remove('open');
+    }
+
+    const params = `ntfy_enabled=${enabled}&ntfy_server=${encodeURIComponent(server)}`;
     
     fetch(buildUrl('/user/settings/'), {
         method: 'POST',
@@ -204,9 +237,20 @@ function saveNtfyTopic() {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': getCookie('csrftoken')
         },
-        body: `ntfy_topic=${encodeURIComponent(ntfyTopic)}`
+        body: params
     })
-    .then(response => response.json());
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else if (data.ntfy_url) {
+            topicUrlDiv.textContent = data.ntfy_url;
+            topicUrlDiv.classList.add('has-url');
+        } else {
+            topicUrlDiv.textContent = '';
+            topicUrlDiv.classList.remove('has-url');
+        }
+    });
 }
 
 function logout() {
@@ -241,13 +285,6 @@ function clearFilter() {
     const params = new URLSearchParams(window.location.search);
     params.delete('tags');
     window.location.href = `${window.location.pathname}?${params.toString()}#calendar`;
-}
-
-function toggleNtfyInfo() {
-    const infoBox = document.getElementById('ntfy-info');
-    if (infoBox) {
-        infoBox.style.display = infoBox.style.display === 'none' ? 'block' : 'none';
-    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

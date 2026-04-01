@@ -15,7 +15,7 @@ import json
 
 from .models import Event, Tag, RSVP, OccurrenceDetails, CalendarUser
 from .notifications import notify_waitlist_user, notify_rsvps_event_change
-from .validators import validate_ntfy_topic, sanitize_guest_name
+from .validators import sanitize_guest_name, get_ntfy_url, _get_allowed_ntfy_hosts
 
 
 def get_cookie_path():
@@ -287,6 +287,9 @@ def calendar_view(request):
         all_users_data = list(
             CalendarUser.objects.select_related('team').values('id', 'name', 'team_id', 'team__name')
         )
+
+    if calendar_user:
+        user_prefs['ntfy_url'] = get_ntfy_url(calendar_user)
 
     context = {
         'year': year,
@@ -611,7 +614,9 @@ def login_user(request):
         'user_id': calendar_user.id,
         'name': calendar_user.name,
         'team': calendar_user.team.name,
-        'ntfy_topic': calendar_user.ntfy_topic,
+        'ntfy_enabled': calendar_user.ntfy_enabled,
+        'ntfy_server': calendar_user.ntfy_server,
+        'ntfy_url': get_ntfy_url(calendar_user),
         'language': calendar_user.language,
         'created': created,
     })
@@ -643,11 +648,14 @@ def update_user_settings(request):
     except (CalendarUser.DoesNotExist, ValueError):
         return JsonResponse({'error': 'Invalid user'}, status=400)
 
-    if 'ntfy_topic' in request.POST:
-        try:
-            calendar_user.ntfy_topic = validate_ntfy_topic(request.POST.get('ntfy_topic', '').strip())
-        except ValueError as e:
-            return JsonResponse({'error': str(e)}, status=400)
+    if 'ntfy_enabled' in request.POST:
+        calendar_user.ntfy_enabled = request.POST.get('ntfy_enabled') == 'true'
+    if 'ntfy_server' in request.POST:
+        server = request.POST.get('ntfy_server', '').strip()
+        allowed = _get_allowed_ntfy_hosts()
+        if server and server not in allowed:
+            return JsonResponse({'error': f'Server "{server}" is not allowed.'}, status=400)
+        calendar_user.ntfy_server = server
     if 'language' in request.POST:
         calendar_user.language = request.POST.get('language', '').strip()
 
@@ -655,7 +663,9 @@ def update_user_settings(request):
 
     return JsonResponse({
         'success': True,
-        'ntfy_topic': calendar_user.ntfy_topic,
+        'ntfy_enabled': calendar_user.ntfy_enabled,
+        'ntfy_server': calendar_user.ntfy_server,
+        'ntfy_url': get_ntfy_url(calendar_user),
         'language': calendar_user.language,
     })
 

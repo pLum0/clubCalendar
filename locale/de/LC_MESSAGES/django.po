@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clubCalendar 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-31 11:57+0000\n"
+"POT-Creation-Date: 2026-04-01 07:01+0000\n"
 "PO-Revision-Date: 2026-03-20 10:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -38,17 +38,17 @@ msgstr "Bitte wähle oder gib einen Namen ein."
 msgid "Recurring"
 msgstr "Wiederkehrender Termin"
 
-#: calendar_app/admin.py:171
+#: calendar_app/admin.py:169
 msgid "Cancel selected events"
 msgstr ""
 
-#: calendar_app/admin.py:182
+#: calendar_app/admin.py:178
 #, fuzzy
 #| msgid "Event cancelled: %(event_title)s"
 msgid "Uncancel selected events"
 msgstr "Veranstaltung abgesagt: %(event_title)s"
 
-#: calendar_app/admin.py:195
+#: calendar_app/admin.py:191
 msgid "User"
 msgstr ""
 
@@ -165,17 +165,17 @@ msgstr ""
 
 #: calendar_app/templates/calendar_app/admin_wrapper.html:4
 #: calendar_app/templates/calendar_app/base.html:27
-#: calendar_app/templates/calendar_app/base.html:48
+#: calendar_app/templates/calendar_app/base.html:64
 msgid "Admin"
 msgstr "Administration"
 
 #: calendar_app/templates/calendar_app/base.html:25
-#: calendar_app/templates/calendar_app/base.html:46
+#: calendar_app/templates/calendar_app/base.html:62
 msgid "Calendar"
 msgstr "Kalender"
 
 #: calendar_app/templates/calendar_app/base.html:26
-#: calendar_app/templates/calendar_app/base.html:47
+#: calendar_app/templates/calendar_app/base.html:63
 msgid "Upcoming"
 msgstr "Anstehend"
 
@@ -193,68 +193,53 @@ msgid "Logout"
 msgstr "Abmelden"
 
 #: calendar_app/templates/calendar_app/calendar.html:18
-msgid "Push notifications (optional):"
-msgstr "Push-Benachrichtigungen (optional):"
+msgid "Push notifications"
+msgstr "Push-Benachrichtigungen"
 
 #: calendar_app/templates/calendar_app/calendar.html:22
 msgid ""
 "Get push notifications via ntfy - a free, open-source notification service."
 msgstr ""
-"Erhalte Push-Benachrichtigungen via ntfy - ein kostenloser, quelloffener "
+"Erhalte Push-Benachrichtigungen via ntfy - einem kostenlosen, quelloffenen "
 "Benachrichtigungsdienst."
 
 #: calendar_app/templates/calendar_app/calendar.html:23
-msgid "How to use:"
-msgstr "Anleitung:"
+msgid "How to set up:"
+msgstr "Einrichtung:"
 
-#: calendar_app/templates/calendar_app/calendar.html:25
-msgid "Install the ntfy app:"
-msgstr "Installiere die ntfy-App:"
+#: calendar_app/templates/calendar_app/calendar.html:28
+msgid "Enable notifications"
+msgstr "Benachrichtigungen aktivieren"
+
+#: calendar_app/templates/calendar_app/calendar.html:31
+msgid "Copy the topic URL shown below"
+msgstr "Kopiere die unten angezeigte Topic-URL"
 
 #: calendar_app/templates/calendar_app/calendar.html:32
-msgid "Choose a unique topic name and enter it above"
-msgstr "Wähle einen einzigartigen Topic-Namen und gib ihn oben ein"
+msgid "Install the ntfy app and subscribe to that URL:"
+msgstr "Installiere die ntfy-App und abonniere diese URL:"
 
-#: calendar_app/templates/calendar_app/calendar.html:33
-msgid "Subscribe to the same topic in the app"
-msgstr "Abonniere dasselbe Topic in der App"
+#: calendar_app/templates/calendar_app/calendar.html:42
+msgid "Server:"
+msgstr "Server:"
 
-#: calendar_app/templates/calendar_app/calendar.html:35
-msgid "Note:"
-msgstr "Hinweis:"
-
-#: calendar_app/templates/calendar_app/calendar.html:35
-msgid ""
-"If you enter just a topic name (e.g., 'mytopic'), the public ntfy.sh server "
-"will be used. You can also enter a full URL to use any ntfy server (e.g., "
-"'https://ntfy.example.com/mytopic')."
-msgstr ""
-"Wenn du nur einen Topic-Namen eingibst (z.B. 'meintopic'), wird der "
-"öffentliche ntfy.sh-Server verwendet. Du kannst auch eine vollständige URL "
-"eingeben, um einen beliebigen ntfy-Server zu nutzen (z.B. 'https://"
-"ntfy.example.com/meintopic')."
-
-#: calendar_app/templates/calendar_app/calendar.html:37
-msgid "e.g., mytopic or https://ntfy.example.com/mytopic"
-msgstr "z.B. meintopic oder https://ntfy.example.com/meintopic"
-
-#: calendar_app/templates/calendar_app/calendar.html:40
+#: calendar_app/templates/calendar_app/calendar.html:54
 msgid "Your Name:"
 msgstr "Dein Name:"
 
-#: calendar_app/templates/calendar_app/calendar.html:41
+#: calendar_app/templates/calendar_app/calendar.html:55
 msgid "Enter your name"
 msgstr "Gib deinen Namen ein"
 
-#: calendar_app/templates/calendar_app/calendar.html:44
+#: calendar_app/templates/calendar_app/calendar.html:58
 msgid "Your Team:"
 msgstr "Deine Mannschaft:"
 
-#: calendar_app/templates/calendar_app/calendar.html:46
+#: calendar_app/templates/calendar_app/calendar.html:60
 msgid "Select your team"
 msgstr "Wähle deine Mannschaft"
 
-#: calendar_app/templates/calendar_app/calendar.html:52
+#: calendar_app/templates/calendar_app/calendar.html:66
 msgid ""
 "Team selection is for display only — you can RSVP to <strong>any</strong> "
 "event. Please create only <strong>one</strong> account for your name, even "
@@ -265,85 +250,85 @@ msgstr ""
 "strong> Konto für deinen Namen, auch wenn du in mehreren Mannschaften "
 "spielst."
 
-#: calendar_app/templates/calendar_app/calendar.html:55
+#: calendar_app/templates/calendar_app/calendar.html:69
 msgid "Login"
 msgstr "Anmelden"
 
-#: calendar_app/templates/calendar_app/calendar.html:60
+#: calendar_app/templates/calendar_app/calendar.html:74
 msgid "Filter by Team"
 msgstr "Nach Mannschaft filtern"
 
-#: calendar_app/templates/calendar_app/calendar.html:71
+#: calendar_app/templates/calendar_app/calendar.html:85
 msgid "Clear Filter"
 msgstr "Filter löschen"
 
-#: calendar_app/templates/calendar_app/calendar.html:77
+#: calendar_app/templates/calendar_app/calendar.html:91
 msgid "Prev"
 msgstr "Zurück"
 
-#: calendar_app/templates/calendar_app/calendar.html:79
+#: calendar_app/templates/calendar_app/calendar.html:93
 msgid "Next"
 msgstr "Weiter"
 
-#: calendar_app/templates/calendar_app/calendar.html:85
+#: calendar_app/templates/calendar_app/calendar.html:99
 msgid "Mon"
 msgstr "Mo"
 
-#: calendar_app/templates/calendar_app/calendar.html:86
+#: calendar_app/templates/calendar_app/calendar.html:100
 msgid "Tue"
 msgstr "Di"
 
-#: calendar_app/templates/calendar_app/calendar.html:87
+#: calendar_app/templates/calendar_app/calendar.html:101
 msgid "Wed"
 msgstr "Mi"
 
-#: calendar_app/templates/calendar_app/calendar.html:88
+#: calendar_app/templates/calendar_app/calendar.html:102
 msgid "Thu"
 msgstr "Do"
 
-#: calendar_app/templates/calendar_app/calendar.html:89
+#: calendar_app/templates/calendar_app/calendar.html:103
 msgid "Fri"
 msgstr "Fr"
 
-#: calendar_app/templates/calendar_app/calendar.html:90
+#: calendar_app/templates/calendar_app/calendar.html:104
 msgid "Sat"
 msgstr "Sa"
 
-#: calendar_app/templates/calendar_app/calendar.html:91
+#: calendar_app/templates/calendar_app/calendar.html:105
 msgid "Sun"
 msgstr "So"
 
-#: calendar_app/templates/calendar_app/calendar.html:107
+#: calendar_app/templates/calendar_app/calendar.html:121
 #: calendar_app/templates/calendar_app/event_detail.html:38
 #: calendar_app/templates/calendar_app/upcoming.html:35
 msgid "CANCELLED"
 msgstr "ABGESAGT"
 
-#: calendar_app/templates/calendar_app/calendar.html:113
+#: calendar_app/templates/calendar_app/calendar.html:127
 msgid "Reason"
 msgstr "Grund"
 
-#: calendar_app/templates/calendar_app/calendar.html:113
+#: calendar_app/templates/calendar_app/calendar.html:127
 msgid "Notice"
 msgstr "Hinweis"
 
-#: calendar_app/templates/calendar_app/calendar.html:116
+#: calendar_app/templates/calendar_app/calendar.html:130
 msgid "Time changed"
 msgstr "Zeit geändert"
 
-#: calendar_app/templates/calendar_app/calendar.html:118
+#: calendar_app/templates/calendar_app/calendar.html:132
 msgid "attending"
 msgstr "dabei"
 
-#: calendar_app/templates/calendar_app/calendar.html:172
+#: calendar_app/templates/calendar_app/calendar.html:186
 msgid "Please enter your name"
 msgstr "Bitte gib deinen Namen ein"
 
-#: calendar_app/templates/calendar_app/calendar.html:176
+#: calendar_app/templates/calendar_app/calendar.html:190
 msgid "Please select your team"
 msgstr "Bitte wähle deine Mannschaft"
 
-#: calendar_app/templates/calendar_app/calendar.html:193
+#: calendar_app/templates/calendar_app/calendar.html:207
 msgid "Failed to login"
 msgstr "Anmeldung fehlgeschlagen"
 
@@ -725,6 +710,28 @@ msgstr "Englisch"
 #: calendar_project/settings.py:105
 msgid "German"
 msgstr "Deutsch"
+
+#~ msgid "Choose a unique topic name and enter it above"
+#~ msgstr "Wähle einen einzigartigen Topic-Namen und gib ihn oben ein"
+
+#~ msgid "Subscribe to the same topic in the app"
+#~ msgstr "Abonniere dasselbe Topic in der App"
+
+#~ msgid "Note:"
+#~ msgstr "Hinweis:"
+
+#~ msgid ""
+#~ "If you enter just a topic name (e.g., 'mytopic'), the public ntfy.sh "
+#~ "server will be used. You can also enter a full URL to use any ntfy server "
+#~ "(e.g., 'https://ntfy.example.com/mytopic')."
+#~ msgstr ""
+#~ "Wenn du nur einen Topic-Namen eingibst (z.B. 'meintopic'), wird der "
+#~ "öffentliche ntfy.sh-Server verwendet. Du kannst auch eine vollständige "
+#~ "URL eingeben, um einen beliebigen ntfy-Server zu nutzen (z.B. 'https://"
+#~ "ntfy.example.com/meintopic')."
+
+#~ msgid "e.g., mytopic or https://ntfy.example.com/mytopic"
+#~ msgstr "z.B. meintopic oder https://ntfy.example.com/meintopic"
 
 #~ msgid "Add Guest RSVP"
 #~ msgstr "Gast-Anmeldung hinzufügen"

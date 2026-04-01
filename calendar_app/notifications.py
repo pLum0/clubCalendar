@@ -8,6 +8,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 
 from .models import RSVP
+from .validators import _get_allowed_ntfy_hosts, get_ntfy_url
 
 
 def send_ntfy_notification(topic, title, message, click_url=None, tags=None):
@@ -15,11 +16,7 @@ def send_ntfy_notification(topic, title, message, click_url=None, tags=None):
         return False
     if topic.startswith('http://') or topic.startswith('https://'):
         parsed = urlparse(topic)
-        allowed_hosts = ['ntfy.sh']
-        extra_hosts = getattr(settings, 'NTFY_ALLOWED_HOSTS', '')
-        if extra_hosts:
-            allowed_hosts.extend(h.strip() for h in extra_hosts.split(',') if h.strip())
-        if parsed.hostname not in allowed_hosts:
+        if parsed.hostname not in _get_allowed_ntfy_hosts():
             return False
         url = topic
     else:
@@ -48,11 +45,14 @@ def send_notification_async(topic, title, message, click_url=None, tags=None):
 
 
 def notify_waitlist_user(rsvp, event, occurrence_date):
-    ntfy_topic = rsvp.user.ntfy_topic if rsvp.user else None
-    if not ntfy_topic:
+    user = rsvp.user
+    if not user or not user.ntfy_enabled:
+        return
+    ntfy_url = get_ntfy_url(user)
+    if not ntfy_url:
         return
 
-    with translation.override(rsvp.user.language or 'en'):
+    with translation.override(user.language or 'en'):
         date_iso = occurrence_date.strftime('%Y-%m-%d')
         date_str = date_format(occurrence_date, 'DATE_FORMAT')
         title = _("You're off the waitlist!")
@@ -69,7 +69,7 @@ def notify_waitlist_user(rsvp, event, occurrence_date):
             'date': date_str
         }
 
-        send_notification_async(ntfy_topic, title, message, event_url or None, 'tada')
+        send_notification_async(ntfy_url, title, message, event_url or None, 'tada')
 
 
 def _build_event_url(event, date_iso):
@@ -83,7 +83,7 @@ def _build_event_url(event, date_iso):
 
 def notify_rsvps_event_change(event, occurrence_date=None, change_type='modified', reason=None, start_time=None, end_time=None):
     rsvps = RSVP.objects.filter(event=event, status__in=['coming', 'maybe']).select_related('user')
-    rsvps = [r for r in rsvps if r.user and r.user.ntfy_topic]
+    rsvps = [r for r in rsvps if r.user and r.user.ntfy_enabled]
     if occurrence_date:
         rsvps = [r for r in rsvps if r.occurrence_date == occurrence_date]
     else:
@@ -150,4 +150,7 @@ def notify_rsvps_event_change(event, occurrence_date=None, change_type='modified
             else:
                 continue
 
-            send_notification_async(rsvp.user.ntfy_topic, title, message, event_url or None, ntfy_tags)
+            ntfy_url = get_ntfy_url(rsvp.user)
+            if not ntfy_url:
+                continue
+            send_notification_async(ntfy_url, title, message, event_url or None, ntfy_tags)
