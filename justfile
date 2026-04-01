@@ -72,6 +72,10 @@ pip-freeze: ensure-env
 build: ensure-env
     docker compose build
 
+# Start the stack in detached mode with production override (if docker-compose.prod.yml exists)
+up-prod: ensure-env
+    docker compose {{ if test -f docker-compose.prod.yml { "-f docker-compose.yml -f docker-compose.prod.yml" } else { "" } }} up -d --build
+
 # Lint Python files with ruff
 lint-python: ensure-env
     docker compose exec web ruff check .
