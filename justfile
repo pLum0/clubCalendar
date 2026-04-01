@@ -74,7 +74,7 @@ build: ensure-env
 
 # Start the stack in detached mode with production override (if docker-compose.prod.yml exists)
 up-prod: ensure-env
-    docker compose {{ if test -f docker-compose.prod.yml { "-f docker-compose.yml -f docker-compose.prod.yml" } else { "" } }} up -d --build
+    @if [ -f docker-compose.prod.yml ]; then docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build; else docker compose up -d --build; fi
 
 # Lint Python files with ruff
 lint-python: ensure-env
