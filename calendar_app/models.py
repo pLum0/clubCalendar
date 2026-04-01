@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 from django.utils import timezone
 from recurrence.fields import RecurrenceField
 
@@ -7,10 +6,10 @@ from recurrence.fields import RecurrenceField
 class Tag(models.Model):
     name = models.CharField(max_length=100, unique=True)
     color = models.CharField(max_length=7, default='#3498db', help_text='Hex color code, e.g., #3498db')
-    
+
     class Meta:
         ordering = ['name']
-    
+
     def __str__(self):
         return self.name
 
@@ -23,11 +22,11 @@ class CalendarUser(models.Model):
     language = models.CharField(max_length=10, blank=True, default='en', help_text='User language preference')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         unique_together = ['name', 'team']
         ordering = ['name', 'team']
-    
+
     def __str__(self):
         return f"{self.name} ({self.team.name})"
 
@@ -47,13 +46,13 @@ class Event(models.Model):
     guests = models.JSONField(default=list, blank=True, help_text='Guest RSVPs: [{"name": "...", "status": "coming"}]')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['date', 'start_time']
-    
+
     def __str__(self):
         return f"{self.title} - {self.date} {self.start_time}"
-    
+
     @property
     def is_recurring(self):
         return bool(self.recurrence)
@@ -65,7 +64,7 @@ class RSVP(models.Model):
         ('not_coming', 'Not Coming'),
         ('maybe', 'Maybe'),
     ]
-    
+
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='rsvps')
     occurrence_date = models.DateField(help_text='The specific date of the occurrence (for recurring events)')
     user = models.ForeignKey(CalendarUser, on_delete=models.CASCADE, related_name='rsvps')
@@ -74,11 +73,11 @@ class RSVP(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     status_updated_at = models.DateTimeField(default=timezone.now)
-    
+
     class Meta:
         unique_together = ['event', 'occurrence_date', 'user']
         ordering = ['status_updated_at']
-    
+
     def __str__(self):
         return f"{self.user.name} ({self.user.team.name}) - {self.get_status_display()} for {self.event.title} on {self.occurrence_date}"
 
@@ -93,12 +92,12 @@ class OccurrenceDetails(models.Model):
     guests = models.JSONField(default=list, blank=True, help_text='Guest RSVPs for this occurrence')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         verbose_name_plural = 'Occurrence details'
         unique_together = ['event', 'occurrence_date']
         ordering = ['occurrence_date']
-    
+
     def __str__(self):
         status = "Cancelled" if self.cancelled else "Modified"
         return f"{status}: {self.event.title} on {self.occurrence_date}"

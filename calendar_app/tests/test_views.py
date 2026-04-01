@@ -1,11 +1,13 @@
-from datetime import date, time, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from unittest.mock import patch
-from django.test import TestCase, Client
+
+import recurrence as rec_module
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.test import Client, TestCase
 from recurrence import Recurrence, Rule
-import recurrence as rec_module
-from calendar_app.models import Tag, CalendarUser, Event, RSVP, OccurrenceDetails
+
+from calendar_app.models import RSVP, CalendarUser, Event, OccurrenceDetails, Tag
 
 
 def _url(path):
@@ -205,14 +207,14 @@ class UpdateOccurrenceViewTest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
     def test_invalid_date(self):
-        admin = User.objects.create_superuser('admin', 'admin@test.com', 'pass')
+        User.objects.create_superuser('admin', 'admin@test.com', 'pass')
         self.client.login(username='admin', password='pass')
         resp = self.client.post(self.url, {'occurrence_date': 'invalid'})
         self.assertEqual(resp.status_code, 400)
 
     @patch('calendar_app.views.notify_rsvps_event_change')
     def test_cancel_occurrence(self, mock_notify):
-        admin = User.objects.create_superuser('admin', 'admin@test.com', 'pass')
+        User.objects.create_superuser('admin', 'admin@test.com', 'pass')
         self.client.login(username='admin', password='pass')
         resp = self.client.post(self.url, {
             'occurrence_date': '2025-06-08',
@@ -230,7 +232,7 @@ class UpdateOccurrenceViewTest(TestCase):
 
     @patch('calendar_app.views.notify_rsvps_event_change')
     def test_uncancel_occurrence(self, mock_notify):
-        admin = User.objects.create_superuser('admin', 'admin@test.com', 'pass')
+        User.objects.create_superuser('admin', 'admin@test.com', 'pass')
         self.client.login(username='admin', password='pass')
 
         OccurrenceDetails.objects.create(
@@ -246,7 +248,7 @@ class UpdateOccurrenceViewTest(TestCase):
         self.assertFalse(details.cancelled)
 
     def test_time_override(self):
-        admin = User.objects.create_superuser('admin', 'admin@test.com', 'pass')
+        User.objects.create_superuser('admin', 'admin@test.com', 'pass')
         self.client.login(username='admin', password='pass')
         resp = self.client.post(self.url, {
             'occurrence_date': '2025-06-08',
@@ -260,7 +262,7 @@ class UpdateOccurrenceViewTest(TestCase):
         self.assertEqual(data['end_time'], '16:00:00')
 
     def test_invalid_start_time(self):
-        admin = User.objects.create_superuser('admin', 'admin@test.com', 'pass')
+        User.objects.create_superuser('admin', 'admin@test.com', 'pass')
         self.client.login(username='admin', password='pass')
         resp = self.client.post(self.url, {
             'occurrence_date': '2025-06-08',

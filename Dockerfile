@@ -10,10 +10,19 @@ RUN apt-get update \
         postgresql-client \
         netcat-openbsd \
         gettext \
+        curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+COPY requirements-dev.txt .
+RUN pip install --no-cache-dir -r requirements-dev.txt
+
+COPY package.json package-lock.json* ./
+RUN npm install --ignore-scripts
 
 COPY . .
 

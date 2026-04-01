@@ -1,9 +1,11 @@
-from datetime import date, time, datetime, timedelta
+from datetime import date, datetime, time
+
+import recurrence as rec_module
 from django.test import TestCase
 from recurrence import Recurrence, Rule
-import recurrence as rec_module
-from calendar_app.models import Tag, CalendarUser, Event, RSVP, OccurrenceDetails
-from calendar_app.views import get_event_occurrences, _prefetch_rsvps
+
+from calendar_app.models import RSVP, CalendarUser, Event, OccurrenceDetails, Tag
+from calendar_app.views import _prefetch_rsvps, get_event_occurrences
 
 
 class OccurrenceTestMixin:

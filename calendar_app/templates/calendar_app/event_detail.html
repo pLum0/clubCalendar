@@ -1,225 +1,223 @@
 {% extends 'calendar_app/base.html' %}
 {% load i18n %}
 {% load recurrence_utils %}
-
 {% block title %}{{ event.title }} - {{ SITE_NAME }}{% endblock %}
-
 {% block content %}
-<div class="event-detail-container">
-    <a href="{% url 'calendar' %}" class="back-link">&laquo; {% trans "Back to Calendar" %}</a>
-    
-    {% if is_admin %}
-    <div class="admin-controls">
-        <h3>{% trans "Admin Controls" %}</h3>
-        <div class="admin-buttons">
-            <button type="button" class="admin-btn" onclick="openAdminModal('status')">{% trans "Edit Status" %}</button>
-            <button type="button" class="admin-btn" onclick="openAdminModal('time')">{% trans "Change Time" %}</button>
-        </div>
-    </div>
-    
-    <div class="admin-modal" id="adminModal">
-        <div class="admin-modal-content">
-            <button type="button" class="admin-modal-close" onclick="closeAdminModal()">&times;</button>
-            <h3 id="adminModalTitle"></h3>
-            <form id="adminForm" onsubmit="submitAdminForm(event)">
-                <div id="adminModalBody"></div>
-                <div class="admin-modal-actions">
-                    <button type="button" class="admin-btn secondary" onclick="closeAdminModal()">{% trans "Cancel" %}</button>
-                    <button type="submit" class="admin-btn">{% trans "Save" %}</button>
+    <div class="event-detail-container">
+        <a href="{% url 'calendar' %}" class="back-link">&laquo; {% trans "Back to Calendar" %}</a>
+        {% if is_admin %}
+            <div class="admin-controls">
+                <h3>{% trans "Admin Controls" %}</h3>
+                <div class="admin-buttons">
+                    <button type="button" class="admin-btn" onclick="openAdminModal('status')">{% trans "Edit Status" %}</button>
+                    <button type="button" class="admin-btn" onclick="openAdminModal('time')">{% trans "Change Time" %}</button>
                 </div>
-            </form>
-        </div>
-    </div>
-    {% endif %}
-    
-    <div class="event-detail-card">
-        {% if is_cancelled %}
-        <div class="cancelled-banner">
-            <strong>{% trans "CANCELLED" %}</strong>
-            {% if cancel_reason %}<span>{{ cancel_reason }}</span>{% endif %}
-        </div>
-        {% elif cancel_reason %}
-        <div class="notice-banner">
-            <strong>{% trans "NOTICE" %}</strong>
-            <span>{{ cancel_reason }}</span>
-        </div>
+            </div>
+            <div class="admin-modal" id="adminModal">
+                <div class="admin-modal-content">
+                    <button type="button" class="admin-modal-close" onclick="closeAdminModal()">&times;</button>
+                    <h3 id="adminModalTitle"></h3>
+                    <form id="adminForm" onsubmit="submitAdminForm(event)">
+                        <div id="adminModalBody"></div>
+                        <div class="admin-modal-actions">
+                            <button type="button" class="admin-btn secondary" onclick="closeAdminModal()">{% trans "Cancel" %}</button>
+                            <button type="submit" class="admin-btn">{% trans "Save" %}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         {% endif %}
-        
-        {% if time_changed %}
-        <div class="notice-banner">
-            <strong>{% trans "TIME CHANGED" %}</strong>
-            <span>{% trans "The time for this occurrence has been modified." %}</span>
-        </div>
-        {% endif %}
-        
-        <h1>{% if is_cancelled %}<del>{% endif %}{{ event.title }}{% if is_cancelled %}</del>{% endif %}</h1>
-        
-        {% if event.recurrence %}
-        <span class="recurring-badge">{% trans "Recurring Event" %}</span>
-        {% endif %}
-        
-        <div class="event-info">
-            <div class="info-row">
-                <strong>{% trans "Date:" %}</strong> 
-                {% if occurrence_date and occurrence_date != event.date %}
-                    {{ occurrence_date|date:"l, F j, Y" }}
-                    <span class="original-date-hint">({% blocktrans with date=event.date|date:"M j, Y" %}recurring from {{ date }}{% endblocktrans %})</span>
-                {% else %}
-                    {{ event.date|date:"l, F j, Y" }}
+        <div class="event-detail-card">
+            {% if is_cancelled %}
+                <div class="cancelled-banner">
+                    <strong>{% trans "CANCELLED" %}</strong>
+                    {% if cancel_reason %}<span>{{ cancel_reason }}</span>{% endif %}
+                </div>
+            {% elif cancel_reason %}
+                <div class="notice-banner">
+                    <strong>{% trans "NOTICE" %}</strong>
+                    <span>{{ cancel_reason }}</span>
+                </div>
+            {% endif %}
+            {% if time_changed %}
+                <div class="notice-banner">
+                    <strong>{% trans "TIME CHANGED" %}</strong>
+                    <span>{% trans "The time for this occurrence has been modified." %}</span>
+                </div>
+            {% endif %}
+            <h1>
+                {% if is_cancelled %}<del>{% endif %}
+                    {{ event.title }}
+                    {% if is_cancelled %}</del>{% endif %}
+            </h1>
+            {% if event.recurrence %}
+                <span class="recurring-badge">{% trans "Recurring Event" %}</span>
+            {% endif %}
+            <div class="event-info">
+                <div class="info-row">
+                    <strong>{% trans "Date:" %}</strong>
+                    {% if occurrence_date and occurrence_date != event.date %}
+                        {{ occurrence_date|date:"l, F j, Y" }}
+                        <span class="original-date-hint">({% blocktrans with date=event.date|date:"M j, Y" %}recurring from {{ date }}{% endblocktrans %})</span>
+                    {% else %}
+                        {{ event.date|date:"l, F j, Y" }}
+                    {% endif %}
+                </div>
+                <div class="info-row">
+                    <strong>{% trans "Time:" %}</strong> {{ start_time|time:"H:i" }}
+                    {% if end_time %}- {{ end_time|time:"H:i" }}{% endif %}
+                </div>
+                {% if event.location %}
+                    <div class="info-row">
+                        <strong>{% trans "Location:" %}</strong> {{ event.location }}
+                    </div>
+                {% endif %}
+                {% if event.description %}
+                    <div class="info-row">
+                        <strong>{% trans "Description:" %}</strong>
+                        <p>{{ event.description }}</p>
+                    </div>
+                {% endif %}
+                {% if max_participants %}
+                    <div class="info-row">
+                        <strong>{% trans "Max Participants:" %}</strong> {{ max_participants }}
+                    </div>
+                {% endif %}
+                {% if event.tags.all %}
+                    <div class="info-row">
+                        <strong>{% trans "Teams:" %}</strong>
+                        <div class="event-tags-list">
+                            {% for tag in event.tags.all %}
+                                <span class="tag-badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                {% if event.recurrence %}
+                    <div class="info-row">
+                        <strong>{% trans "Repeats:" %}</strong> {{ event.recurrence|human_readable_recurrence }}
+                    </div>
                 {% endif %}
             </div>
-            <div class="info-row">
-                <strong>{% trans "Time:" %}</strong> {{ start_time|time:"H:i" }}{% if end_time %} - {{ end_time|time:"H:i" }}{% endif %}
-            </div>
-            {% if event.location %}
-            <div class="info-row">
-                <strong>{% trans "Location:" %}</strong> {{ event.location }}
-            </div>
-            {% endif %}
-            {% if event.description %}
-            <div class="info-row">
-                <strong>{% trans "Description:" %}</strong>
-                <p>{{ event.description }}</p>
-            </div>
-            {% endif %}
-            {% if max_participants %}
-            <div class="info-row">
-                <strong>{% trans "Max Participants:" %}</strong> {{ max_participants }}
-            </div>
-            {% endif %}
-            {% if event.tags.all %}
-            <div class="info-row">
-                <strong>{% trans "Teams:" %}</strong>
-                <div class="event-tags-list">
-                    {% for tag in event.tags.all %}
-                        <span class="tag-badge" style="background-color: {{ tag.color }}">{{ tag.name }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-            {% if event.recurrence %}
-            <div class="info-row">
-                <strong>{% trans "Repeats:" %}</strong> {{ event.recurrence|human_readable_recurrence }}
-            </div>
-            {% endif %}
-        </div>
-        
-        <div class="rsvp-section">
-            <h2>{% trans "Your RSVP" %}</h2>
-            {% if not user_prefs.calendar_user %}
-            <p class="warning">{% trans "Please set your name and team in the calendar view to RSVP." %}</p>
-            {% else %}
-            <div class="rsvp-form">
-                <p>{% blocktrans with name=user_prefs.calendar_user.name team=user_prefs.calendar_user.team.name %}RSVPing as: <strong>{{ name }}</strong> ({{ team }}){% endblocktrans %}</p>
-                
-                <div class="rsvp-buttons">
-                    <button class="rsvp-btn coming {% if user_rsvp.status == 'coming' %}active{% endif %}" 
-                            onclick="submitRSVP('coming')">
-                        {% trans "Coming" %}
-                    </button>
-                    <button class="rsvp-btn maybe {% if user_rsvp.status == 'maybe' %}active{% endif %}"
-                            onclick="submitRSVP('maybe')">
-                        {% trans "Maybe" %}
-                    </button>
-                    <button class="rsvp-btn not-coming {% if user_rsvp.status == 'not_coming' %}active{% endif %}"
-                            onclick="submitRSVP('not_coming')">
-                        {% trans "Not Coming" %}
-                    </button>
-                </div>
-                
-                <div class="comment-section">
-                    <label for="rsvp-comment">{% trans "Comment (optional):" %}</label>
-                    <textarea id="rsvp-comment" rows="2" onblur="saveComment()">{{ user_rsvp.comment|default:"" }}</textarea>
-                </div>
-            </div>
-
-            <div class="guest-rsvp-section" id="guestRsvpSection">
-                <button type="button" class="guest-rsvp-toggle" onclick="toggleGuestRsvp()">{% trans "Add RSVP for someone else" %}</button>
-                <div class="guest-rsvp-form" id="guestRsvpForm">
-                    <div class="autocomplete-wrapper">
-                        <input type="text" id="otherPlayerInput" placeholder="{% trans 'Type a name...' %}" maxlength="100" autocomplete="off">
-                        <ul class="autocomplete-list" id="autocompleteList"></ul>
+            <div class="rsvp-section">
+                <h2>{% trans "Your RSVP" %}</h2>
+                {% if not user_prefs.calendar_user %}
+                    <p class="warning">{% trans "Please set your name and team in the calendar view to RSVP." %}</p>
+                {% else %}
+                    <div class="rsvp-form">
+                        <p>
+                            {% blocktrans with name=user_prefs.calendar_user.name team=user_prefs.calendar_user.team.name %}RSVPing as: <strong>{{ name }}</strong> ({{ team }}){% endblocktrans %}
+                        </p>
+                        <div class="rsvp-buttons">
+                            <button class="rsvp-btn coming {% if user_rsvp.status == 'coming' %}active{% endif %}"
+                                    onclick="submitRSVP('coming')">{% trans "Coming" %}</button>
+                            <button class="rsvp-btn maybe {% if user_rsvp.status == 'maybe' %}active{% endif %}"
+                                    onclick="submitRSVP('maybe')">{% trans "Maybe" %}</button>
+                            <button class="rsvp-btn not-coming {% if user_rsvp.status == 'not_coming' %}active{% endif %}"
+                                    onclick="submitRSVP('not_coming')">{% trans "Not Coming" %}</button>
+                        </div>
+                        <div class="comment-section">
+                            <label for="rsvp-comment">{% trans "Comment (optional):" %}</label>
+                            <textarea id="rsvp-comment" rows="2" onblur="saveComment()">{{ user_rsvp.comment|default:"" }}</textarea>
+                        </div>
                     </div>
-                    <div class="rsvp-buttons" id="otherRsvpButtons">
-                        <button class="rsvp-btn coming" onclick="submitOtherRSVP('coming')">{% trans "Coming" %}</button>
-                        <button class="rsvp-btn maybe" onclick="submitOtherRSVP('maybe')">{% trans "Maybe" %}</button>
-                        <button class="rsvp-btn not-coming" onclick="submitOtherRSVP('not_coming')">{% trans "Not Coming" %}</button>
+                    <div class="guest-rsvp-section" id="guestRsvpSection">
+                        <button type="button" class="guest-rsvp-toggle" onclick="toggleGuestRsvp()">
+                            {% trans "Add RSVP for someone else" %}
+                        </button>
+                        <div class="guest-rsvp-form" id="guestRsvpForm">
+                            <div class="autocomplete-wrapper">
+                                <input type="text"
+                                       id="otherPlayerInput"
+                                       placeholder="{% trans 'Type a name...' %}"
+                                       maxlength="100"
+                                       autocomplete="off">
+                                <ul class="autocomplete-list" id="autocompleteList">
+                                </ul>
+                            </div>
+                            <div class="rsvp-buttons" id="otherRsvpButtons">
+                                <button class="rsvp-btn coming" onclick="submitOtherRSVP('coming')">{% trans "Coming" %}</button>
+                                <button class="rsvp-btn maybe" onclick="submitOtherRSVP('maybe')">{% trans "Maybe" %}</button>
+                                <button class="rsvp-btn not-coming" onclick="submitOtherRSVP('not_coming')">{% trans "Not Coming" %}</button>
+                            </div>
+                        </div>
                     </div>
+                {% endif %}
+            </div>
+            <div class="rsvps-summary">
+                <h2>{% trans "Responses" %}</h2>
+                <div class="rsvp-group">
+                    <h3>
+                        {% blocktrans count counter=rsvps_by_status.coming|length %}Coming ({{ counter }}){% plural %}Coming ({{ counter }}){% endblocktrans %}
+                    </h3>
+                    <ul class="rsvp-list">
+                        {% for rsvp in rsvps_by_status.coming %}
+                            <li>
+                                {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
+                                {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                                {% if max_participants and forloop.counter > max_participants %}
+                                    <span class="waitlist-notice">({% trans "waitlist" %})</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                        {% for guest in guests_by_status.coming %}
+                            <li>
+                                {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                            </li>
+                        {% endfor %}
+                        {% if not rsvps_by_status.coming and not guests_by_status.coming %}
+                            <li class="empty">{% trans "No one yet" %}</li>
+                        {% endif %}
+                    </ul>
                 </div>
-            </div>
-            {% endif %}
-        </div>
-        
-        <div class="rsvps-summary">
-            <h2>{% trans "Responses" %}</h2>
-            
-            <div class="rsvp-group">
-                <h3>{% blocktrans count counter=rsvps_by_status.coming|length %}Coming ({{ counter }}){% plural %}Coming ({{ counter }}){% endblocktrans %}</h3>
-                <ul class="rsvp-list">
-                    {% for rsvp in rsvps_by_status.coming %}
-                    <li>
-                        {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
-                        {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
-                        {% if max_participants and forloop.counter > max_participants %}<span class="waitlist-notice">({% trans "waitlist" %})</span>{% endif %}
-                    </li>
-                    {% endfor %}
-                    {% for guest in guests_by_status.coming %}
-                    <li>
-                        {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
-                    </li>
-                    {% endfor %}
-                    {% if not rsvps_by_status.coming and not guests_by_status.coming %}
-                    <li class="empty">{% trans "No one yet" %}</li>
-                    {% endif %}
-                </ul>
-            </div>
-            
-            <div class="rsvp-group">
-                <h3>{% blocktrans count counter=rsvps_by_status.maybe|length %}Maybe ({{ counter }}){% plural %}Maybe ({{ counter }}){% endblocktrans %}</h3>
-                <ul class="rsvp-list">
-                    {% for rsvp in rsvps_by_status.maybe %}
-                    <li>
-                        {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
-                        {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
-                    </li>
-                    {% endfor %}
-                    {% for guest in guests_by_status.maybe %}
-                    <li>
-                        {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
-                    </li>
-                    {% endfor %}
-                    {% if not rsvps_by_status.maybe and not guests_by_status.maybe %}
-                    <li class="empty">{% trans "No one yet" %}</li>
-                    {% endif %}
-                </ul>
-            </div>
-            
-            <div class="rsvp-group">
-                <h3>{% blocktrans count counter=rsvps_by_status.not_coming|length %}Not Coming ({{ counter }}){% plural %}Not Coming ({{ counter }}){% endblocktrans %}</h3>
-                <ul class="rsvp-list">
-                    {% for rsvp in rsvps_by_status.not_coming %}
-                    <li>
-                        {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
-                        {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
-                    </li>
-                    {% endfor %}
-                    {% for guest in guests_by_status.not_coming %}
-                    <li>
-                        {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
-                    </li>
-                    {% endfor %}
-                    {% if not rsvps_by_status.not_coming and not guests_by_status.not_coming %}
-                    <li class="empty">{% trans "No one yet" %}</li>
-                    {% endif %}
-                </ul>
+                <div class="rsvp-group">
+                    <h3>
+                        {% blocktrans count counter=rsvps_by_status.maybe|length %}Maybe ({{ counter }}){% plural %}Maybe ({{ counter }}){% endblocktrans %}
+                    </h3>
+                    <ul class="rsvp-list">
+                        {% for rsvp in rsvps_by_status.maybe %}
+                            <li>
+                                {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
+                                {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                            </li>
+                        {% endfor %}
+                        {% for guest in guests_by_status.maybe %}
+                            <li>
+                                {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                            </li>
+                        {% endfor %}
+                        {% if not rsvps_by_status.maybe and not guests_by_status.maybe %}
+                            <li class="empty">{% trans "No one yet" %}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="rsvp-group">
+                    <h3>
+                        {% blocktrans count counter=rsvps_by_status.not_coming|length %}Not Coming ({{ counter }}){% plural %}Not Coming ({{ counter }}){% endblocktrans %}
+                    </h3>
+                    <ul class="rsvp-list">
+                        {% for rsvp in rsvps_by_status.not_coming %}
+                            <li>
+                                {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
+                                {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                            </li>
+                        {% endfor %}
+                        {% for guest in guests_by_status.not_coming %}
+                            <li>
+                                {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                            </li>
+                        {% endfor %}
+                        {% if not rsvps_by_status.not_coming and not guests_by_status.not_coming %}
+                            <li class="empty">{% trans "No one yet" %}</li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
-
 {% block extra_js %}
-<script>
+    <script>
 const occurrenceDate = "{{ occurrence_date|date:'Y-m-d' }}";
 const isCancelled = {{ is_cancelled|yesno:'true,false' }};
 const currentReason = "{{ cancel_reason|escapejs }}";
@@ -387,12 +385,11 @@ function saveComment() {
         });
     }
 }
-</script>
-
-{{ other_players_data|json_script:"known-players-data" }}
-{{ all_users_data|json_script:"all-users-data" }}
-{{ guests_data|json_script:"guests-data" }}
-<script>
+    </script>
+    {{ other_players_data|json_script:"known-players-data" }}
+    {{ all_users_data|json_script:"all-users-data" }}
+    {{ guests_data|json_script:"guests-data" }}
+    <script>
 var knownPlayers = JSON.parse(document.getElementById('known-players-data').textContent);
 var allUsers = JSON.parse(document.getElementById('all-users-data').textContent);
 var guestRSVPs = JSON.parse(document.getElementById('guests-data').textContent);
@@ -510,5 +507,5 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
-</script>
+    </script>
 {% endblock %}

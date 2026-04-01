@@ -71,3 +71,33 @@ pip-freeze: ensure-env
 # Build without starting
 build: ensure-env
     docker compose build
+
+# Lint Python files with ruff
+lint-python: ensure-env
+    docker compose exec web ruff check .
+
+# Lint HTML templates with djlint
+lint-html: ensure-env
+    docker compose exec web djlint calendar_app/templates --check
+
+# Lint CSS with stylelint
+lint-css: ensure-env
+    docker compose exec web /app/node_modules/.bin/stylelint "calendar_app/static/calendar_app/css/style.css"
+
+# Lint JavaScript in HTML templates with ESLint
+lint-js: ensure-env
+    docker compose exec web /app/node_modules/.bin/eslint "calendar_app/**/*.js"
+
+# Run all linters
+lint: lint-python lint-html lint-css lint-js
+
+# Fix Python lint issues
+lint-python-fix: ensure-env
+    docker compose exec web ruff check --fix .
+
+# Fix HTML lint issues
+lint-html-fix: ensure-env
+    docker compose exec web djlint calendar_app/templates --reformat
+
+# Fix all auto-fixable lint issues
+lint-fix: lint-python-fix lint-html-fix

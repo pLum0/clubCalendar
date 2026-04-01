@@ -1,19 +1,20 @@
-from datetime import date, time, datetime
-from unittest.mock import patch, MagicMock
 import urllib.error
+from datetime import date, time
+from unittest.mock import MagicMock, patch
+
 from django.test import TestCase
-from django.utils import timezone
-from calendar_app.models import Tag, CalendarUser, Event, RSVP, OccurrenceDetails
+
+from calendar_app.models import RSVP, CalendarUser, Event, Tag
 from calendar_app.notifications import (
-    send_ntfy_notification,
-    notify_waitlist_user,
-    notify_rsvps_event_change,
     _build_event_url,
+    notify_rsvps_event_change,
+    notify_waitlist_user,
+    send_ntfy_notification,
 )
 from calendar_app.validators import (
+    _get_allowed_ntfy_hosts,
     generate_ntfy_topic,
     get_ntfy_url,
-    _get_allowed_ntfy_hosts,
     sanitize_guest_name,
 )
 

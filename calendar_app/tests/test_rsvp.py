@@ -1,9 +1,9 @@
-import json
-from datetime import date, time, datetime, timedelta
-from django.test import TestCase, Client
+from datetime import date, time
+
 from django.conf import settings
-from django.utils import timezone
-from calendar_app.models import Tag, CalendarUser, Event, RSVP, OccurrenceDetails
+from django.test import Client, TestCase
+
+from calendar_app.models import RSVP, CalendarUser, Event, Tag
 
 
 def _url(path):
@@ -129,7 +129,7 @@ class RSVPCreateTest(RSVPTestMixin, TestCase):
         self.assertEqual(rsvp.occurrence_date, self.event.date)
 
     def test_empty_occurrence_date_uses_event_date(self):
-        resp = self.client.post(self.url, {
+        self.client.post(self.url, {
             'user_id': self.user.id,
             'status': 'coming',
         })
@@ -151,7 +151,7 @@ class RSVPCreateTest(RSVPTestMixin, TestCase):
         rsvp = self._create_rsvp(self.event, self.user, 'coming')
         old_updated_at = rsvp.status_updated_at
 
-        resp = self.client.post(self.url, {
+        self.client.post(self.url, {
             'user_id': self.user.id,
             'status': 'maybe',
         })
@@ -162,7 +162,7 @@ class RSVPCreateTest(RSVPTestMixin, TestCase):
         rsvp = self._create_rsvp(self.event, self.user, 'coming')
         old_updated_at = rsvp.status_updated_at
 
-        resp = self.client.post(self.url, {
+        self.client.post(self.url, {
             'user_id': self.user.id,
             'status': 'coming',
         })
@@ -170,7 +170,7 @@ class RSVPCreateTest(RSVPTestMixin, TestCase):
         self.assertEqual(rsvp.status_updated_at, old_updated_at)
 
     def test_comment_saved(self):
-        resp = self.client.post(self.url, {
+        self.client.post(self.url, {
             'user_id': self.user.id,
             'status': 'coming',
             'comment': 'Looking forward to it',

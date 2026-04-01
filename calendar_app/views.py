@@ -1,21 +1,21 @@
-from django.shortcuts import render, get_object_or_404, redirect
+import contextlib
+from calendar import monthcalendar
+from collections import defaultdict
+from datetime import datetime, timedelta
+from urllib.parse import unquote
+
+from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.formats import date_format
-from django.utils.translation import gettext as _
-from django.db.models import Q
-from django.conf import settings
-from datetime import datetime, timedelta
-from calendar import monthcalendar, monthrange
-from urllib.parse import unquote
-from collections import defaultdict
-import json
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.http import require_POST
 
-from .models import Event, Tag, RSVP, OccurrenceDetails, CalendarUser
-from .notifications import notify_waitlist_user, notify_rsvps_event_change
-from .validators import sanitize_guest_name, get_ntfy_url, _get_allowed_ntfy_hosts
+from .models import RSVP, CalendarUser, Event, OccurrenceDetails, Tag
+from .notifications import notify_rsvps_event_change, notify_waitlist_user
+from .validators import _get_allowed_ntfy_hosts, get_ntfy_url, sanitize_guest_name
 
 
 def get_cookie_path():
@@ -39,10 +39,8 @@ def get_user_preferences(request):
 
     calendar_user = None
     if user_id:
-        try:
+        with contextlib.suppress(CalendarUser.DoesNotExist, ValueError):
             calendar_user = CalendarUser.objects.select_related('team').get(id=int(user_id))
-        except (CalendarUser.DoesNotExist, ValueError):
-            pass
 
     return {
         'calendar_user': calendar_user,
@@ -814,9 +812,8 @@ def update_occurrence(request, event_id):
             notify_rsvps_event_change(event, occurrence_date, 'cancelled', reason)
         else:
             notify_rsvps_event_change(event, occurrence_date, 'notice', reason)
-    elif time_changed_flag:
-        if not cancelled:
-            notify_rsvps_event_change(event, occurrence_date, 'time_changed', start_time=start_time, end_time=end_time)
+    elif time_changed_flag and not cancelled:
+        notify_rsvps_event_change(event, occurrence_date, 'time_changed', start_time=start_time, end_time=end_time)
 
     return JsonResponse({
         'success': True,

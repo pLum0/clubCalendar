@@ -1,0 +1,27 @@
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "UP",
+    "B",
+    "SIM",
+    "DJ",
+]
+ignore = [
+    "E501",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["calendar_app", "calendar_project"]
+
+[tool.djlint]
+profile = "django"
+indent = 4
+max_line_length = 120
+ignore = "H030,H031"

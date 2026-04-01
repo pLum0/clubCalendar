@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from calendar_app.validators import _get_allowed_ntfy_hosts
 
 

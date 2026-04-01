@@ -1,16 +1,16 @@
 {% extends 'calendar_app/base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "Admin" %} - {{ SITE_NAME }}{% endblock %}
-
-{% block content %}
-<div class="admin-wrapper">
-    <iframe src="{% if SECRET_PATH %}/{{ SECRET_PATH }}{% endif %}/admin/" class="admin-iframe"></iframe>
-</div>
+{% block title %}
+    {% trans "Admin" %} - {{ SITE_NAME }}
 {% endblock %}
-
+{% block content %}
+    <div class="admin-wrapper">
+        <iframe src="{% if SECRET_PATH %}/{{ SECRET_PATH }}{% endif %}/admin/"
+                class="admin-iframe"></iframe>
+    </div>
+{% endblock %}
 {% block extra_css %}
-<style>
+    <style>
 main {
     padding: 0 !important;
     max-width: none !important;
@@ -28,5 +28,5 @@ main {
     border: none;
     display: block;
 }
-</style>
+    </style>
 {% endblock %}

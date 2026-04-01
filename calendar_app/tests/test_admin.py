@@ -1,12 +1,14 @@
-from datetime import date, time, datetime, timedelta
-from unittest.mock import patch, MagicMock
-from django.test import TestCase, RequestFactory
-from django.contrib.auth.models import User
-from recurrence import Recurrence, Rule
+from datetime import date, time
+from unittest.mock import MagicMock, patch
+
 import recurrence as rec_module
-from calendar_app.models import Tag, CalendarUser, Event, RSVP, OccurrenceDetails
+from django.contrib.auth.models import User
+from django.test import RequestFactory, TestCase
+from recurrence import Recurrence, Rule
+
 from calendar_app.admin import EventAdmin, OccurrenceDetailsAdmin
 from calendar_app.admin_site import custom_admin_site
+from calendar_app.models import Event, OccurrenceDetails, Tag
 
 
 class EventAdminActionsTest(TestCase):

@@ -5,6 +5,7 @@ Django settings for calendar_project project.
 import os
 from pathlib import Path
 from urllib.parse import urlparse
+
 from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent

@@ -1,12 +1,12 @@
-from django.contrib import admin
-from django import forms
-from django.utils import timezone
-from django.utils.translation import gettext as _
-from django.conf import settings
 from datetime import datetime, timedelta
 
-from .models import Tag, Event, RSVP, OccurrenceDetails, CalendarUser
+from django import forms
+from django.contrib import admin
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
 from .admin_site import custom_admin_site
+from .models import RSVP, CalendarUser, Event, OccurrenceDetails, Tag
 from .notifications import notify_rsvps_event_change
 
 
@@ -116,9 +116,8 @@ class OccurrenceDetailsAdmin(admin.ModelAdmin):
                 notify_rsvps_event_change(obj.event, obj.occurrence_date, 'cancelled', obj.reason)
             else:
                 notify_rsvps_event_change(obj.event, obj.occurrence_date, 'notice', obj.reason)
-        elif (obj.override_start_time != old_start_time or obj.override_end_time != old_end_time):
-            if not obj.cancelled:
-                notify_rsvps_event_change(obj.event, obj.occurrence_date, 'time_changed', start_time=obj.override_start_time, end_time=obj.override_end_time)
+        elif (obj.override_start_time != old_start_time or obj.override_end_time != old_end_time) and not obj.cancelled:
+            notify_rsvps_event_change(obj.event, obj.occurrence_date, 'time_changed', start_time=obj.override_start_time, end_time=obj.override_end_time)
 
 
 @admin.register(Event, site=custom_admin_site)

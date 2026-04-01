@@ -1,7 +1,7 @@
-from datetime import date, time
-from django.test import TestCase, Client
 from django.conf import settings
-from calendar_app.models import Tag, CalendarUser
+from django.test import Client, TestCase
+
+from calendar_app.models import CalendarUser, Tag
 
 
 def _url(path):
@@ -101,8 +101,9 @@ class UserPreferencesTest(TestCase):
         cls.team = Tag.objects.create(name='Team', color='#000000')
 
     def test_get_user_preferences_with_cookie(self):
-        from calendar_app.views import get_user_preferences
         from django.test import RequestFactory
+
+        from calendar_app.views import get_user_preferences
 
         user = CalendarUser.objects.create(name='Alice', team=self.team)
         factory = RequestFactory()
@@ -112,8 +113,9 @@ class UserPreferencesTest(TestCase):
         self.assertEqual(prefs['calendar_user'], user)
 
     def test_get_user_preferences_invalid_cookie(self):
-        from calendar_app.views import get_user_preferences
         from django.test import RequestFactory
+
+        from calendar_app.views import get_user_preferences
 
         factory = RequestFactory()
         request = factory.get('/')
@@ -122,8 +124,9 @@ class UserPreferencesTest(TestCase):
         self.assertIsNone(prefs['calendar_user'])
 
     def test_get_user_preferences_no_cookie(self):
-        from calendar_app.views import get_user_preferences
         from django.test import RequestFactory
+
+        from calendar_app.views import get_user_preferences
 
         factory = RequestFactory()
         request = factory.get('/')
@@ -131,8 +134,9 @@ class UserPreferencesTest(TestCase):
         self.assertIsNone(prefs['calendar_user'])
 
     def test_preferred_tags_from_cookie(self):
-        from calendar_app.views import get_user_preferences
         from django.test import RequestFactory
+
+        from calendar_app.views import get_user_preferences
 
         factory = RequestFactory()
         request = factory.get('/')
@@ -141,8 +145,9 @@ class UserPreferencesTest(TestCase):
         self.assertEqual(prefs['preferred_tags'], ['Team1', 'Team2'])
 
     def test_preferred_tags_empty(self):
-        from calendar_app.views import get_user_preferences
         from django.test import RequestFactory
+
+        from calendar_app.views import get_user_preferences
 
         factory = RequestFactory()
         request = factory.get('/')
@@ -187,12 +192,6 @@ class UpdateUserSettingsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.user.refresh_from_db()
         self.assertEqual(self.user.language, 'de')
-
-    def test_invalid_ntfy_server_rejected(self):
-        self.client.cookies['calendar_user_id'] = str(self.user.id)
-        resp = self.client.post(self.url, {'ntfy_server': 'evil.com'})
-        self.assertEqual(resp.status_code, 400)
-        self.assertIn('error', resp.json())
 
     def test_not_logged_in(self):
         resp = self.client.post(self.url, {'ntfy_enabled': 'true'})

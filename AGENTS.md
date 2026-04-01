@@ -87,3 +87,51 @@ Never skip step 3 — always provide the German `msgstr` for every new/changed `
 - No JavaScript framework — vanilla JS inline in templates
 - Environment variables configured via `.env` file (see `.env_example`)
 - `SECRET_PATH` env var can prefix all URLs (e.g., `/mysecret/`)
+
+## Linting (IMPORTANT)
+
+**All Python, HTML, JavaScript, and CSS must pass linting before any commit.** Linting tools run inside the Docker container.
+
+Tools configured:
+- **ruff** — Python linter/formatter (import sorting, unused imports, code style)
+- **djlint** — Django HTML template linter/formatter (indentation, structure)
+- **stylelint** — CSS linter (modern syntax, best practices)
+- **ESLint** — JavaScript linter (for inline JS in templates)
+
+Configuration files:
+- `pyproject.toml` — ruff and djlint settings
+- `eslint.config.js` — ESLint configuration
+- `stylelint.config.js` — stylelint configuration
+- `requirements-dev.txt` — Python dev dependencies (ruff, djlint)
+- `package.json` — Node.js dev dependencies (ESLint, stylelint)
+
+### Running linters
+
+Using `just` (recommended):
+```bash
+just lint              # Run all linters
+just lint-python       # ruff check
+just lint-html         # djlint check
+just lint-css          # stylelint
+just lint-js           # ESLint
+just lint-fix          # Auto-fix Python and HTML issues
+```
+
+Or manually:
+```bash
+docker compose exec web ruff check .
+docker compose exec web djlint calendar_app/templates --check
+docker compose exec web /app/node_modules/.bin/stylelint "calendar_app/static/calendar_app/css/style.css"
+docker compose exec web /app/node_modules/.bin/eslint "calendar_app/templates/**/*.html"
+```
+
+### Auto-fixing issues
+```bash
+docker compose exec web ruff check --fix .
+docker compose exec web djlint calendar_app/templates --reformat
+docker compose exec web /app/node_modules/.bin/stylelint "calendar_app/static/calendar_app/css/style.css" --fix
+```
+
+### Before committing
+
+Always run `just lint` and fix any errors before committing. If adding new Python/HTML/CSS/JS code, ensure it passes all linters.

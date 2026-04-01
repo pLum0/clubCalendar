@@ -1,7 +1,8 @@
-import urllib.request
-import urllib.error
 import threading
+import urllib.error
+import urllib.request
 from urllib.parse import urlparse
+
 from django.conf import settings
 from django.utils import translation
 from django.utils.formats import date_format

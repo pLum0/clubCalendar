@@ -1,8 +1,10 @@
-from django.contrib import admin
+from datetime import datetime, timedelta
+
 from django.conf import settings
+from django.contrib import admin
 from django.http import JsonResponse
 from django.utils import timezone
-from datetime import datetime, timedelta
+
 from .models import Event
 
 
@@ -11,7 +13,7 @@ def get_event_occurrences(request, event_id):
         event = Event.objects.get(pk=event_id)
     except Event.DoesNotExist:
         return JsonResponse({'occurrences': []})
-    
+
     occurrences = []
     if event.recurrence:
         today = timezone.now().date()
@@ -28,7 +30,7 @@ def get_event_occurrences(request, event_id):
                 'date': date_val.isoformat(),
                 'label': date_val.strftime('%A, %B %d, %Y')
             })
-    
+
     return JsonResponse({'occurrences': occurrences})
 
 
@@ -37,7 +39,7 @@ class CustomAdminSite(admin.AdminSite):
         context = super().each_context(request)
         context['SECRET_PATH'] = settings.SECRET_PATH
         return context
-    
+
     def get_urls(self):
         from django.urls import path
         urls = super().get_urls()
