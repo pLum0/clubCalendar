@@ -33,7 +33,7 @@
                       class="language-selector"
                       id="language-form">
                     {% csrf_token %}
-                    <input name="next" type="hidden" value="{{ request.path }}">
+                    <input name="next" type="hidden" value="{{ request.get_full_path }}">
                     <select name="language"
                             onchange="submitLanguageChange(this.value, 'language-form')">
                         {% get_current_language as LANGUAGE_CODE %}
@@ -55,7 +55,7 @@
                           class="mobile-language-selector"
                           id="mobile-language-form">
                         {% csrf_token %}
-                        <input name="next" type="hidden" value="{{ request.path }}">
+                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
                         <select name="language"
                                 onchange="submitLanguageChange(this.value, 'mobile-language-form')">
                             {% get_current_language as LANGUAGE_CODE %}
