@@ -148,66 +148,66 @@
                 <h2>{% trans "Responses" %}</h2>
                 <div class="rsvp-group">
                     <h3>
-                        {% blocktrans count counter=rsvps_by_status.coming|length %}Coming ({{ counter }}){% plural %}Coming ({{ counter }}){% endblocktrans %}
+                        {% blocktrans count counter=total_counts.coming %}Coming ({{ counter }}){% plural %}Coming ({{ counter }}){% endblocktrans %}
                     </h3>
                     <ul class="rsvp-list">
-                        {% for rsvp in rsvps_by_status.coming %}
+                        {% for entry in merged_lists.coming %}
                             <li>
-                                {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
-                                {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                                {{ entry.name }}
+                                {% if entry.type == "user" %}
+                                    <span class="rsvp-team">({{ entry.team_name }})</span>
+                                    {% if entry.comment %}<span class="rsvp-comment">"{{ entry.comment }}"</span>{% endif %}
+                                {% else %}
+                                    <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                                {% endif %}
                                 {% if max_participants and forloop.counter > max_participants %}
                                     <span class="waitlist-notice">({% trans "waitlist" %})</span>
                                 {% endif %}
                             </li>
                         {% endfor %}
-                        {% for guest in guests_by_status.coming %}
-                            <li>
-                                {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
-                            </li>
-                        {% endfor %}
-                        {% if not rsvps_by_status.coming and not guests_by_status.coming %}
+                        {% if not merged_lists.coming %}
                             <li class="empty">{% trans "No one yet" %}</li>
                         {% endif %}
                     </ul>
                 </div>
                 <div class="rsvp-group">
                     <h3>
-                        {% blocktrans count counter=rsvps_by_status.maybe|length %}Maybe ({{ counter }}){% plural %}Maybe ({{ counter }}){% endblocktrans %}
+                        {% blocktrans count counter=total_counts.maybe %}Maybe ({{ counter }}){% plural %}Maybe ({{ counter }}){% endblocktrans %}
                     </h3>
                     <ul class="rsvp-list">
-                        {% for rsvp in rsvps_by_status.maybe %}
+                        {% for entry in merged_lists.maybe %}
                             <li>
-                                {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
-                                {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                                {{ entry.name }}
+                                {% if entry.type == "user" %}
+                                    <span class="rsvp-team">({{ entry.team_name }})</span>
+                                    {% if entry.comment %}<span class="rsvp-comment">"{{ entry.comment }}"</span>{% endif %}
+                                {% else %}
+                                    <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                                {% endif %}
                             </li>
                         {% endfor %}
-                        {% for guest in guests_by_status.maybe %}
-                            <li>
-                                {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
-                            </li>
-                        {% endfor %}
-                        {% if not rsvps_by_status.maybe and not guests_by_status.maybe %}
+                        {% if not merged_lists.maybe %}
                             <li class="empty">{% trans "No one yet" %}</li>
                         {% endif %}
                     </ul>
                 </div>
                 <div class="rsvp-group">
                     <h3>
-                        {% blocktrans count counter=rsvps_by_status.not_coming|length %}Not Coming ({{ counter }}){% plural %}Not Coming ({{ counter }}){% endblocktrans %}
+                        {% blocktrans count counter=total_counts.not_coming %}Not Coming ({{ counter }}){% plural %}Not Coming ({{ counter }}){% endblocktrans %}
                     </h3>
                     <ul class="rsvp-list">
-                        {% for rsvp in rsvps_by_status.not_coming %}
+                        {% for entry in merged_lists.not_coming %}
                             <li>
-                                {{ rsvp.user.name }} <span class="rsvp-team">({{ rsvp.user.team.name }})</span>
-                                {% if rsvp.comment %}<span class="rsvp-comment">"{{ rsvp.comment }}"</span>{% endif %}
+                                {{ entry.name }}
+                                {% if entry.type == "user" %}
+                                    <span class="rsvp-team">({{ entry.team_name }})</span>
+                                    {% if entry.comment %}<span class="rsvp-comment">"{{ entry.comment }}"</span>{% endif %}
+                                {% else %}
+                                    <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
+                                {% endif %}
                             </li>
                         {% endfor %}
-                        {% for guest in guests_by_status.not_coming %}
-                            <li>
-                                {{ guest.name }} <span class="rsvp-guest-tag">({% trans "Guest" %})</span>
-                            </li>
-                        {% endfor %}
-                        {% if not rsvps_by_status.not_coming and not guests_by_status.not_coming %}
+                        {% if not merged_lists.not_coming %}
                             <li class="empty">{% trans "No one yet" %}</li>
                         {% endif %}
                     </ul>
