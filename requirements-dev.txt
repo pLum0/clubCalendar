@@ -1,3 +1,4 @@
 -r requirements.txt
 ruff>=0.8.0
 djlint>=1.36.0
+httpx[http2]>=0.27.0
