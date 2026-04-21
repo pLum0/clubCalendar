@@ -107,7 +107,7 @@ def _get_merged_status_list(rsvps_by_status, guests_by_status, status_key):
     return entries
 
 
-def _check_waitlist_promotion(event, occurrence_date):
+def _check_waitlist_promotion(event, occurrence_date, cancelled_timestamp=None):
     if not event.max_participants:
         return
 
@@ -127,11 +127,15 @@ def _check_waitlist_promotion(event, occurrence_date):
 
     entries.sort(key=lambda x: x[1])
 
-    if len(entries) > event.max_participants:
-        for entry_type, _ts, entry in entries[event.max_participants :]:
-            if entry_type == "rsvp":
-                notify_waitlist_user(entry, event, occurrence_date)
-                break
+    if cancelled_timestamp is not None:
+        earlier_count = sum(1 for _, ts, _ in entries if ts < cancelled_timestamp)
+        if earlier_count >= event.max_participants:
+            return
+
+    if len(entries) >= event.max_participants:
+        entry_type, _ts, entry = entries[event.max_participants - 1]
+        if entry_type == "rsvp":
+            notify_waitlist_user(entry, event, occurrence_date)
 
 
 def get_event_occurrences(event, start_date, end_date, calendar_user=None, rsvp_data=None):
@@ -505,11 +509,12 @@ def rsvp(request, event_id):
     if status == "remove":
         existing_rsvp = RSVP.objects.filter(event=event, occurrence_date=occurrence_date, user=calendar_user).first()
         was_coming = existing_rsvp and existing_rsvp.status == "coming"
+        cancelled_ts = existing_rsvp.status_updated_at if existing_rsvp else None
 
         RSVP.objects.filter(event=event, occurrence_date=occurrence_date, user=calendar_user).delete()
 
         if event.max_participants and was_coming:
-            _check_waitlist_promotion(event, occurrence_date)
+            _check_waitlist_promotion(event, occurrence_date, cancelled_timestamp=cancelled_ts)
 
         return JsonResponse({"success": True, "removed": True})
 
@@ -532,7 +537,7 @@ def rsvp(request, event_id):
     )
 
     if event.max_participants and old_status == "coming" and status != "coming":
-        _check_waitlist_promotion(event, occurrence_date)
+        _check_waitlist_promotion(event, occurrence_date, cancelled_timestamp=existing_rsvp.status_updated_at)
 
     response = JsonResponse(
         {
@@ -588,14 +593,16 @@ def guest_rsvp(request, event_id):
     if request.POST.get("action") == "remove":
         existing_guest = next((g for g in guests if g.get("name") == name), None)
         was_coming = existing_guest and existing_guest.get("status") == "coming"
+        cancelled_ts = _parse_guest_timestamp(existing_guest) if existing_guest else None
         guests = [g for g in guests if g.get("name") != name]
         set_guests(event, occurrence_date, guests)
         if event.max_participants and was_coming:
-            _check_waitlist_promotion(event, occurrence_date)
+            _check_waitlist_promotion(event, occurrence_date, cancelled_timestamp=cancelled_ts)
         return JsonResponse({"success": True, "removed": True})
 
     existing = [g for g in guests if g.get("name") == name]
     old_status = existing[0].get("status") if existing else None
+    old_guest_ts = _parse_guest_timestamp(existing[0]) if existing else None
     now = timezone.now().isoformat()
 
     if existing:
@@ -608,7 +615,7 @@ def guest_rsvp(request, event_id):
     set_guests(event, occurrence_date, guests)
 
     if event.max_participants and old_status == "coming" and status != "coming":
-        _check_waitlist_promotion(event, occurrence_date)
+        _check_waitlist_promotion(event, occurrence_date, cancelled_timestamp=old_guest_ts)
 
     return JsonResponse({"success": True, "status": status, "name": name})
 

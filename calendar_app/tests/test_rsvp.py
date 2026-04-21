@@ -1,4 +1,5 @@
 from datetime import date, time
+from unittest.mock import patch
 
 from django.conf import settings
 from django.test import Client, TestCase
@@ -294,7 +295,8 @@ class WaitlistPromotionTest(RSVPTestMixin, TestCase):
         self._create_rsvp(self.event, user3, "coming")
         return user1, user2, user3
 
-    def test_confirmed_user_removed_triggers_waitlist_notification(self):
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_confirmed_user_removed_triggers_waitlist_notification(self, mock_notify):
         user1, user2, user3 = self._create_waitlist_scenario()
 
         resp = self.client.post(
@@ -306,8 +308,12 @@ class WaitlistPromotionTest(RSVPTestMixin, TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(RSVP.objects.filter(status="coming").count(), 2)
+        mock_notify.assert_called_once()
+        called_rsvp = mock_notify.call_args[0][0]
+        self.assertEqual(called_rsvp.user, user3)
 
-    def test_waitlisted_user_removed_no_notification(self):
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_waitlisted_user_removed_no_notification(self, mock_notify):
         user1, user2, user3 = self._create_waitlist_scenario()
 
         RSVP.objects.filter(user=user1).delete()
@@ -320,8 +326,10 @@ class WaitlistPromotionTest(RSVPTestMixin, TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(RSVP.objects.filter(status="coming").count(), 1)
+        mock_notify.assert_not_called()
 
-    def test_status_change_from_coming_triggers_waitlist(self):
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_status_change_from_coming_triggers_waitlist(self, mock_notify):
         user1, user2, user3 = self._create_waitlist_scenario()
 
         resp = self.client.post(
@@ -333,6 +341,9 @@ class WaitlistPromotionTest(RSVPTestMixin, TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(RSVP.objects.filter(status="coming").count(), 2)
+        mock_notify.assert_called_once()
+        called_rsvp = mock_notify.call_args[0][0]
+        self.assertEqual(called_rsvp.user, user3)
 
     def test_status_change_from_maybe_no_waitlist_trigger(self):
         user1 = self._create_user("User1")
@@ -362,6 +373,50 @@ class WaitlistPromotionTest(RSVPTestMixin, TestCase):
             },
         )
         self.assertEqual(resp.status_code, 200)
+
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_no_waitlist_exists_no_notification(self, mock_notify):
+        user1 = self._create_user("User1")
+        user2 = self._create_user("User2")
+        self._create_rsvp(self.event, user1, "coming")
+        self._create_rsvp(self.event, user2, "coming")
+
+        resp = self.client.post(
+            self.url,
+            {
+                "user_id": user1.id,
+                "status": "remove",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        mock_notify.assert_not_called()
+
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_multiple_waitlisted_one_promoted(self, mock_notify):
+        user1 = self._create_user("User1")
+        user2 = self._create_user("User2")
+        user3 = self._create_user("User3")
+        user4 = self._create_user("User4")
+        user3.ntfy_enabled = True
+        user3.ntfy_server = "ntfy.sh"
+        user3.save()
+
+        self._create_rsvp(self.event, user1, "coming")
+        self._create_rsvp(self.event, user2, "coming")
+        self._create_rsvp(self.event, user3, "coming")
+        self._create_rsvp(self.event, user4, "coming")
+
+        resp = self.client.post(
+            self.url,
+            {
+                "user_id": user1.id,
+                "status": "remove",
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        mock_notify.assert_called_once()
+        called_rsvp = mock_notify.call_args[0][0]
+        self.assertEqual(called_rsvp.user, user3)
 
 
 class GuestRSVPTest(RSVPTestMixin, TestCase):
@@ -521,19 +576,17 @@ class GuestWaitlistTest(RSVPTestMixin, TestCase):
         self.guest_url = _url(f"/event/{self.event.id}/guest-rsvp/")
         self.rsvp_url = _url(f"/event/{self.event.id}/rsvp/")
 
-    def test_guest_remove_triggers_waitlist_promotion(self):
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_guest_remove_triggers_waitlist_promotion(self, mock_notify):
         user1 = self._create_user("User1")
-        user2 = self._create_user("User2")
         user3 = self._create_user("User3")
         user3.ntfy_enabled = True
         user3.ntfy_server = "ntfy.sh"
         user3.save()
 
-        self._create_rsvp(self.event, user1, "coming")
-        self._create_rsvp(self.event, user2, "coming")
-        self._create_rsvp(self.event, user3, "coming")
-
         self.client.post(self.guest_url, {"guest_name": "Guest", "status": "coming"})
+        self._create_rsvp(self.event, user1, "coming")
+        self._create_rsvp(self.event, user3, "coming")
 
         resp = self.client.post(
             self.guest_url,
@@ -544,8 +597,30 @@ class GuestWaitlistTest(RSVPTestMixin, TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp.json()["removed"])
+        mock_notify.assert_called_once()
+        called_rsvp = mock_notify.call_args[0][0]
+        self.assertEqual(called_rsvp.user, user3)
 
-    def test_guest_status_change_triggers_waitlist_promotion(self):
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_guest_status_change_triggers_waitlist_promotion(self, mock_notify):
+        user1 = self._create_user("User1")
+        user3 = self._create_user("User3")
+        user3.ntfy_enabled = True
+        user3.ntfy_server = "ntfy.sh"
+        user3.save()
+
+        self.client.post(self.guest_url, {"guest_name": "Guest", "status": "coming"})
+        self._create_rsvp(self.event, user1, "coming")
+        self._create_rsvp(self.event, user3, "coming")
+
+        resp = self.client.post(self.guest_url, {"guest_name": "Guest", "status": "not_coming"})
+        self.assertEqual(resp.status_code, 200)
+        mock_notify.assert_called_once()
+        called_rsvp = mock_notify.call_args[0][0]
+        self.assertEqual(called_rsvp.user, user3)
+
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_waitlisted_guest_removed_no_promotion(self, mock_notify):
         user1 = self._create_user("User1")
         user2 = self._create_user("User2")
         user3 = self._create_user("User3")
@@ -556,11 +631,17 @@ class GuestWaitlistTest(RSVPTestMixin, TestCase):
         self._create_rsvp(self.event, user1, "coming")
         self._create_rsvp(self.event, user2, "coming")
         self._create_rsvp(self.event, user3, "coming")
-
         self.client.post(self.guest_url, {"guest_name": "Guest", "status": "coming"})
 
-        resp = self.client.post(self.guest_url, {"guest_name": "Guest", "status": "not_coming"})
+        resp = self.client.post(
+            self.guest_url,
+            {
+                "guest_name": "Guest",
+                "action": "remove",
+            },
+        )
         self.assertEqual(resp.status_code, 200)
+        mock_notify.assert_not_called()
 
     def test_guest_counted_in_total_coming(self):
         from calendar_app.views import get_guests
@@ -573,17 +654,16 @@ class GuestWaitlistTest(RSVPTestMixin, TestCase):
         coming_guests = [g for g in guests if g.get("status") == "coming"]
         self.assertEqual(len(coming_guests), 2)
 
-    def test_rsvp_removal_counts_guests_for_waitlist(self):
+    @patch("calendar_app.views.notify_waitlist_user")
+    def test_rsvp_removal_counts_guests_for_waitlist(self, mock_notify):
         user1 = self._create_user("User1")
-        user2 = self._create_user("User2")
         user3 = self._create_user("User3")
         user3.ntfy_enabled = True
         user3.ntfy_server = "ntfy.sh"
         user3.save()
 
-        self._create_rsvp(self.event, user1, "coming")
-        self._create_rsvp(self.event, user2, "coming")
         self.client.post(self.guest_url, {"guest_name": "Guest", "status": "coming"})
+        self._create_rsvp(self.event, user1, "coming")
         self._create_rsvp(self.event, user3, "coming")
 
         resp = self.client.post(
@@ -594,3 +674,6 @@ class GuestWaitlistTest(RSVPTestMixin, TestCase):
             },
         )
         self.assertEqual(resp.status_code, 200)
+        mock_notify.assert_called_once()
+        called_rsvp = mock_notify.call_args[0][0]
+        self.assertEqual(called_rsvp.user, user3)
