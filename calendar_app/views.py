@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.formats import date_format
+from django.utils.translation import get_language
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_POST
 
@@ -636,7 +637,7 @@ def login_user(request):
     except (Tag.DoesNotExist, ValueError):
         return JsonResponse({"error": "Invalid team"}, status=400)
 
-    current_language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, "en")
+    current_language = get_language()
 
     calendar_user, created = CalendarUser.objects.get_or_create(
         name=name, team=team, defaults={"language": current_language}
