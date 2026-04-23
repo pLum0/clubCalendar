@@ -1139,6 +1139,30 @@ button:hover {
     margin-left: 1rem;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.github-link {
+    display: flex;
+    align-items: center;
+    color: white;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    margin-left: 1rem;
+}
+
+.github-link:hover {
+    opacity: 1;
+}
+
+.github-icon {
+    width: 18px;
+    height: 18px;
+    fill: currentcolor;
+}
+
 .language-selector select {
     padding: 0.4rem 0.75rem;
     border-radius: 6px;
@@ -1343,6 +1367,27 @@ button:hover {
     cursor: pointer;
 }
 
+.mobile-github-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #95a5a6 !important;
+    text-decoration: none;
+    padding: 1rem 0;
+    font-size: 1.1rem;
+    margin-top: auto;
+}
+
+.mobile-github-link:hover {
+    color: #2c3e50 !important;
+}
+
+.mobile-github-icon {
+    width: 20px;
+    height: 20px;
+    fill: currentcolor;
+}
+
 @media (width <= 768px) {
     main {
         padding: 1rem;
@@ -1387,6 +1432,10 @@ button:hover {
     }
     
     .language-selector {
+        display: none;
+    }
+
+    .github-link {
         display: none;
     }
     

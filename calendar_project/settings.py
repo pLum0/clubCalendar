@@ -27,6 +27,7 @@ else:
     ALLOWED_HOSTS = ['*']
 
 NTFY_ALLOWED_HOSTS = os.environ.get('NTFY_ALLOWED_HOSTS', '')
+GITHUB_URL = os.environ.get('GITHUB_URL', '')
 
 INSTALLED_APPS = [
     'calendar_app',

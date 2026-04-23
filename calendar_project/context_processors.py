@@ -9,4 +9,5 @@ def site_settings(request):
         'SITE_LOGO': settings.SITE_LOGO,
         'SECRET_PATH': settings.SECRET_PATH,
         'NTFY_SERVERS': _get_allowed_ntfy_hosts(),
+        'GITHUB_URL': settings.GITHUB_URL,
     }

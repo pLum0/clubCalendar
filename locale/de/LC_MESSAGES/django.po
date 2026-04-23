@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clubCalendar 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-15 06:40+0000\n"
+"POT-Creation-Date: 2026-04-23 08:17+0000\n"
 "PO-Revision-Date: 2026-03-20 10:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -165,19 +165,23 @@ msgstr ""
 
 #: calendar_app/templates/calendar_app/admin_wrapper.html:4
 #: calendar_app/templates/calendar_app/base.html:29
-#: calendar_app/templates/calendar_app/base.html:76
+#: calendar_app/templates/calendar_app/base.html:89
 msgid "Admin"
 msgstr "Administration"
 
 #: calendar_app/templates/calendar_app/base.html:27
-#: calendar_app/templates/calendar_app/base.html:74
+#: calendar_app/templates/calendar_app/base.html:87
 msgid "Calendar"
 msgstr "Kalender"
 
 #: calendar_app/templates/calendar_app/base.html:28
-#: calendar_app/templates/calendar_app/base.html:75
+#: calendar_app/templates/calendar_app/base.html:88
 msgid "Upcoming"
 msgstr "Anstehend"
+
+#: calendar_app/templates/calendar_app/base.html:98
+msgid "View on GitHub"
+msgstr "Auf GitHub ansehen"
 
 #: calendar_app/templates/calendar_app/calendar.html:7
 msgid "Your Settings"
@@ -703,11 +707,11 @@ msgstr "im %(months)s"
 msgid "(with some dates excluded)"
 msgstr "(mit einigen ausgeschlossenen Terminen)"
 
-#: calendar_project/settings.py:105
+#: calendar_project/settings.py:106
 msgid "English"
 msgstr "Englisch"
 
-#: calendar_project/settings.py:106
+#: calendar_project/settings.py:107
 msgid "German"
 msgstr "Deutsch"
 
