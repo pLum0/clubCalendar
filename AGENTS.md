@@ -39,7 +39,7 @@ The app is served at `http://localhost:8000`. PostgreSQL runs on the `db` servic
   - `urls.py` — Root URL conf, includes `calendar_app.urls` under `SECRET_PATH` if set
   - `context_processors.py` — Exposes `SITE_NAME`, `SITE_LOGO`, `SITE_URL` to templates
 - `calendar_app/` — Main application
-  - `models.py` — `Tag` (teams), `CalendarUser` (cookie-auth users), `Event`, `RSVP`, `OccurrenceDetails`
+  - `models.py` — `Tag` (teams), `CalendarUser` (cookie-auth users with theme/language preferences), `Event`, `RSVP`, `OccurrenceDetails`
   - `views.py` — All views: calendar, event detail, RSVP, login/logout, admin wrapper, upcoming events
   - `notifications.py` — Shared notification functions (ntfy send, waitlist, event change)
   - `validators.py` — Input validation (ntfy topic, guest name sanitization)
@@ -60,6 +60,7 @@ The app is served at `http://localhost:8000`. PostgreSQL runs on the `db` servic
 - **RSVP**: Per event + occurrence date + user. Supports "coming", "maybe", "not_coming". Optional max participants with waitlist.
 - **Notifications**: Optional push via ntfy.sh. Users configure a topic in their settings.
 - **i18n**: English (default) and German. Uses Django's `{% trans %}` and `{% blocktrans %}` template tags.
+- **Dark Mode**: CSS custom properties with `[data-theme="dark"]` overrides. Toggle in header saves to `theme` cookie and `CalendarUser.theme` via `/user/settings/`. Falls back to `prefers-color-scheme`.
 
 ## Internationalization (IMPORTANT)
 

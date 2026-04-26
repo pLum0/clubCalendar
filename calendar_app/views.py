@@ -39,13 +39,17 @@ def get_user_preferences(request):
         preferred_tags = []
 
     calendar_user = None
+    theme = request.COOKIES.get("theme", "")
     if user_id:
         with contextlib.suppress(CalendarUser.DoesNotExist, ValueError):
             calendar_user = CalendarUser.objects.select_related("team").get(id=int(user_id))
+            if calendar_user.theme and not theme:
+                theme = calendar_user.theme
 
     return {
         "calendar_user": calendar_user,
         "preferred_tags": preferred_tags,
+        "theme": theme,
     }
 
 
@@ -653,6 +657,7 @@ def login_user(request):
             "ntfy_server": calendar_user.ntfy_server,
             "ntfy_url": get_ntfy_url(calendar_user),
             "language": calendar_user.language,
+            "theme": calendar_user.theme,
             "created": created,
         }
     )
@@ -668,6 +673,9 @@ def login_user(request):
 
     if calendar_user.language:
         response.set_cookie(settings.LANGUAGE_COOKIE_NAME, calendar_user.language, **cookie_kwargs)
+
+    if calendar_user.theme:
+        response.set_cookie("theme", calendar_user.theme, **cookie_kwargs)
 
     return response
 
@@ -694,18 +702,38 @@ def update_user_settings(request):
         calendar_user.ntfy_server = server
     if "language" in request.POST:
         calendar_user.language = request.POST.get("language", "").strip()
+    if "theme" in request.POST:
+        theme = request.POST.get("theme", "").strip()
+        if theme in ("light", "dark"):
+            calendar_user.theme = theme
 
     calendar_user.save()
 
-    return JsonResponse(
+    response = JsonResponse(
         {
             "success": True,
             "ntfy_enabled": calendar_user.ntfy_enabled,
             "ntfy_server": calendar_user.ntfy_server,
             "ntfy_url": get_ntfy_url(calendar_user),
             "language": calendar_user.language,
+            "theme": calendar_user.theme,
         }
     )
+
+    if "theme" in request.POST:
+        theme_val = request.POST.get("theme", "").strip()
+        if theme_val in ("light", "dark"):
+            cookie_path = get_cookie_path()
+            response.set_cookie(
+                "theme",
+                theme_val,
+                max_age=365 * 24 * 60 * 60,
+                path=cookie_path,
+                secure=_is_secure(),
+                samesite="Lax",
+            )
+
+    return response
 
 
 @require_POST

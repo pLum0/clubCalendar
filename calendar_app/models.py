@@ -20,6 +20,7 @@ class CalendarUser(models.Model):
     ntfy_enabled = models.BooleanField(default=False, help_text='Enable push notifications via ntfy')
     ntfy_server = models.CharField(max_length=255, blank=True, default='', help_text='ntfy server hostname (e.g., ntfy.sh)')
     language = models.CharField(max_length=10, blank=True, default='en', help_text='User language preference')
+    theme = models.CharField(max_length=10, blank=True, default='', help_text='User theme preference (light/dark)')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

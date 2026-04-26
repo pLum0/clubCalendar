@@ -16,6 +16,7 @@ A Django-based calendar application for sports clubs with recurring and non-recu
 - **No Login Required**: User names and preferences saved in cookies
 - **Multilingual**: Support for English and German (extensible to other languages)
 - **Push Notifications**: Optional notifications via ntfy when events change or users move off waitlist
+- **Dark Mode**: Toggle between light and dark themes, persisted per user via cookie and account settings
 
 ## Quick Start
 

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: clubCalendar 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-23 08:17+0000\n"
+"POT-Creation-Date: 2026-04-26 07:57+0000\n"
 "PO-Revision-Date: 2026-03-20 10:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: German\n"
@@ -165,21 +165,26 @@ msgstr ""
 
 #: calendar_app/templates/calendar_app/admin_wrapper.html:4
 #: calendar_app/templates/calendar_app/base.html:29
-#: calendar_app/templates/calendar_app/base.html:89
+#: calendar_app/templates/calendar_app/base.html:108
 msgid "Admin"
 msgstr "Administration"
 
 #: calendar_app/templates/calendar_app/base.html:27
-#: calendar_app/templates/calendar_app/base.html:87
+#: calendar_app/templates/calendar_app/base.html:106
 msgid "Calendar"
 msgstr "Kalender"
 
 #: calendar_app/templates/calendar_app/base.html:28
-#: calendar_app/templates/calendar_app/base.html:88
+#: calendar_app/templates/calendar_app/base.html:107
 msgid "Upcoming"
 msgstr "Anstehend"
 
-#: calendar_app/templates/calendar_app/base.html:98
+#: calendar_app/templates/calendar_app/base.html:34
+#: calendar_app/templates/calendar_app/base.html:35
+msgid "Toggle dark mode"
+msgstr "Dunkelmodus umschalten"
+
+#: calendar_app/templates/calendar_app/base.html:114
 msgid "View on GitHub"
 msgstr "Auf GitHub ansehen"
 
