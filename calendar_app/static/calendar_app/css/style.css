@@ -81,22 +81,22 @@
 
 [data-theme="dark"] {
     --bg-body: #1a1b2e;
-    --bg-card: #252640;
-    --bg-card-hover: #35365a;
+    --bg-card: #2d2e4a;
+    --bg-card-hover: #3d3e5e;
     --bg-subtle: #2a2b45;
     --bg-subtle-hover: #33345a;
     --bg-today: #1e2845;
     --bg-empty-day: #1e1f35;
     --bg-week-header: #1e1f35;
-    --bg-code: #2a2b45;
+    --bg-code: #3a3b5a;
     --bg-info-box: #3a3520;
     --border-info-box: #6b5f2a;
-    --bg-coming: #1a3a28;
-    --bg-coming-hover: #245033;
-    --bg-maybe: #3a3520;
-    --bg-maybe-hover: #504828;
-    --bg-not-coming: #3a2025;
-    --bg-not-coming-hover: #502830;
+    --bg-coming: #1e5a35;
+    --bg-coming-hover: #2a7045;
+    --bg-maybe: #504818;
+    --bg-maybe-hover: #685f20;
+    --bg-not-coming: #5a1a22;
+    --bg-not-coming-hover: #72222e;
     --bg-cancelled: #dc3545;
     --bg-cancelled-hover: #c82333;
     --bg-cancelled-banner: #3a2025;
@@ -128,9 +128,9 @@
     --shadow-card: 0 2px 10px rgb(0 0 0 / 20%);
     --shadow-card-hover: 0 4px 20px rgb(0 0 0 / 30%);
     --shadow-dropdown: 0 4px 8px rgb(0 0 0 / 30%);
-    --color-coming: #6ac480;
-    --color-maybe: #e0c850;
-    --color-not-coming: #e87080;
+    --color-coming: #80e8a0;
+    --color-maybe: #f0d850;
+    --color-not-coming: #ff8890;
     --color-active-coming: #28a745;
     --color-active-maybe: #ffc107;
     --color-active-not-coming: #dc3545;
