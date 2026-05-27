@@ -27,10 +27,47 @@ docker compose exec web python manage.py test calendar_app.tests --verbosity=2
 To start the stack:
 
 ```bash
+just up
+```
+
+Or manually:
+
+```bash
 docker compose up --build
 ```
 
 The app is served at `http://localhost:8000`. PostgreSQL runs on the `db` service.
+
+## Deployment with nginx-proxy
+
+For production behind an [nginx-proxy](https://github.com/nginx-proxy/nginx-proxy) with automatic SSL:
+
+1. Create a `docker-compose.proxy.yml` file (not committed to the repo):
+
+```yaml
+services:
+  db:
+    networks:
+      - default
+  web:
+    networks:
+      - default
+      - nginx-proxy
+    environment:
+      - VIRTUAL_HOST=your-domain.example.com
+      - LETSENCRYPT_HOST=your-domain.example.com
+      - VIRTUAL_PORT=8000
+
+networks:
+  nginx-proxy:
+    external: true
+```
+
+2. Set `USE_NGINX_PROXY=true` in your `.env` file.
+
+3. Use `just up` — it auto-detects `docker-compose.proxy.yml` and includes it.
+
+If `USE_NGINX_PROXY=true` is set but `docker-compose.proxy.yml` is not loaded (e.g., bare `docker compose up`), the web container will exit with an error message. Always use `just up` on the server.
 
 ## Django Project Structure
 
