@@ -24,7 +24,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: gunicorn --bind 0.0.0.0:8000 calendar_project.wsgi:application
+    command: >
+      bash -c '
+      if [ "$$USE_NGINX_PROXY" = "true" ] && [ -z "$$VIRTUAL_HOST" ]; then
+        echo ""; echo "  ERROR: USE_NGINX_PROXY is set but docker-compose.proxy.yml not loaded."; echo "  Use: just up"; echo "";
+        exit 1;
+      fi;
+      exec gunicorn --bind 0.0.0.0:8000 calendar_project.wsgi:application'
 
 volumes:
   static_volume:

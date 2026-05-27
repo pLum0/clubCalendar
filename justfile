@@ -8,7 +8,7 @@ ensure-env:
 
 # Start the stack in detached mode
 up: ensure-env
-    docker compose up -d
+    @if [ -f docker-compose.proxy.yml ]; then docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d; else docker compose up -d; fi
 
 # Stop the stack
 down:
@@ -71,10 +71,6 @@ pip-freeze: ensure-env
 # Build without starting
 build: ensure-env
     docker compose build
-
-# Start the stack in detached mode with production override (if docker-compose.prod.yml exists)
-up-prod: ensure-env
-    @if [ -f docker-compose.prod.yml ]; then docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d; else docker compose up -d; fi
 
 # Lint Python files with ruff
 lint-python: ensure-env
