@@ -16,10 +16,10 @@
             <nav>
                 <a href="{% url 'calendar' %}" class="logo">
                     {% if SITE_LOGO %}
-                        <img src="{{ SITE_LOGO }}" alt="{{ SITE_NAME }}" class="logo-img">
-                        <span class="logo-text">{{ SITE_NAME }}</span>
+                        <img src="{{ SITE_LOGO }}" alt="{{ SITE_NAME|striptags }}" class="logo-img">
+                        <span class="logo-text">{{ SITE_NAME|safe }}</span>
                     {% else %}
-                        {{ SITE_NAME }}
+                        {{ SITE_NAME|safe }}
                     {% endif %}
                 </a>
                 <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">&#9776;</button>
