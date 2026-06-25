@@ -2,21 +2,25 @@ set dotenv-load
 
 man := "docker compose exec web python manage.py"
 
+# Auto-apply the production overlay when it exists, so `just up` works the same
+# locally and on the server (its presence switches on the nginx-proxy setup).
+compose := if `test -f docker-compose.proxy.yml && echo yes || echo no` == "yes" { "-f docker-compose.yml -f docker-compose.proxy.yml" } else { "-f docker-compose.yml" }
+
 [private]
 ensure-env:
     @test -f .env || (echo "Error: .env file not found. Copy .env_example to .env first." && exit 1)
 
 # Start the stack in detached mode
 up: ensure-env
-    @if [ -f docker-compose.proxy.yml ]; then docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d; else docker compose up -d; fi
+    docker compose {{ compose }} up -d
 
 # Stop the stack
 down:
-    docker compose down
+    docker compose {{ compose }} down
 
 # View logs
 logs:
-    docker compose logs -f
+    docker compose {{ compose }} logs -f
 
 # Run Django management commands (pass command as argument)
 manage *args: ensure-env
@@ -70,7 +74,7 @@ pip-freeze: ensure-env
 
 # Build without starting
 build: ensure-env
-    docker compose build
+    docker compose {{ compose }} build
 
 # Lint Python files with ruff
 lint-python: ensure-env

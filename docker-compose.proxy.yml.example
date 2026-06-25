@@ -1,0 +1,30 @@
+# Production overlay for deployment behind nginx-proxy + acme-companion.
+#
+# Copy to `docker-compose.proxy.yml` on the server (the real file is gitignored).
+# Its mere presence makes `just up` apply this overlay automatically. The only
+# per-site value is SITE_DOMAIN in `.env`, so this file is identical for every
+# deployment and never needs editing.
+services:
+  db:
+    networks:
+      - default
+
+  web:
+    networks:
+      - default
+      - nginx-proxy
+    # Drop the loopback dev port in production — traffic arrives via nginx-proxy,
+    # which reaches the container over the shared network on VIRTUAL_PORT. This
+    # is what keeps the app from being published directly on the host.
+    ports: !override []
+    environment:
+      - VIRTUAL_HOST=${SITE_DOMAIN}
+      - LETSENCRYPT_HOST=${SITE_DOMAIN}
+      - VIRTUAL_PORT=8000
+      # Only needed if your acme-companion has no DEFAULT_EMAIL configured:
+      # - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+
+# The shared external network created by your nginx-proxy stack.
+networks:
+  nginx-proxy:
+    external: true

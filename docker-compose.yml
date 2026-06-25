@@ -14,7 +14,10 @@ services:
   web:
     build: .
     ports:
-      - "8000:8000"
+      # Local dev only; bound to loopback so the app is never exposed directly in
+      # production. The prod overlay (docker-compose.proxy.yml) drops this and
+      # routes traffic via nginx-proxy instead.
+      - "127.0.0.1:${WEB_PORT:-8000}:8000"
     volumes:
       - .:/app
       - /app/node_modules

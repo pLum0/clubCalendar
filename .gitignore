@@ -13,5 +13,5 @@ staticfiles/
 .idea/
 .vscode/
 gunicorn.ctl
-docker-compose.prod.yml
+docker-compose.proxy.yml
 node_modules/

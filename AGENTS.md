@@ -40,34 +40,23 @@ The app is served at `http://localhost:8000`. PostgreSQL runs on the `db` servic
 
 ## Deployment with nginx-proxy
 
-For production behind an [nginx-proxy](https://github.com/nginx-proxy/nginx-proxy) with automatic SSL:
+For production behind an [nginx-proxy](https://github.com/nginx-proxy/nginx-proxy) with automatic SSL, a ready-made overlay is committed as `docker-compose.proxy.yml.example`:
 
-1. Create a `docker-compose.proxy.yml` file (not committed to the repo):
+1. Copy it (the real `docker-compose.proxy.yml` is gitignored):
 
-```yaml
-services:
-  db:
-    networks:
-      - default
-  web:
-    networks:
-      - default
-      - nginx-proxy
-    environment:
-      - VIRTUAL_HOST=your-domain.example.com
-      - LETSENCRYPT_HOST=your-domain.example.com
-      - VIRTUAL_PORT=8000
+   ```bash
+   cp docker-compose.proxy.yml.example docker-compose.proxy.yml
+   ```
 
-networks:
-  nginx-proxy:
-    external: true
-```
+   It needs no edits — it joins the `nginx-proxy` network, sets `VIRTUAL_HOST` /
+   `LETSENCRYPT_HOST` from `$SITE_DOMAIN`, and **drops the published host port**
+   (`ports: !override []`) so the app is reachable only through the proxy.
 
-2. Set `USE_NGINX_PROXY=true` in your `.env` file.
+2. In `.env`, set `USE_NGINX_PROXY=true` and `SITE_DOMAIN=your-domain.example.com`.
 
-3. Use `just up` — it auto-detects `docker-compose.proxy.yml` and includes it.
+3. Run `just up` — it auto-detects `docker-compose.proxy.yml` and applies the overlay.
 
-If `USE_NGINX_PROXY=true` is set but `docker-compose.proxy.yml` is not loaded (e.g., bare `docker compose up`), the web container will exit with an error message. Always use `just up` on the server.
+The base `docker-compose.yml` publishes the dev port on `127.0.0.1` only, so even a bare `docker compose up` never exposes the app to the network. If `USE_NGINX_PROXY=true` but the overlay isn't loaded (e.g. bare `docker compose up`), the web container exits with an error — always use `just up` on the server.
 
 ## Django Project Structure
 
