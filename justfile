@@ -82,8 +82,9 @@ backup: ensure-env
     docker compose {{ compose }} exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' > "backups/db-$(date +%Y%m%d-%H%M%S).sql"
     @echo "✓ backup written to backups/"
 
-# Back up, then rebuild with the latest base image and recreate
+# Back up, then refresh images (pulled + built) and recreate
 update: backup
+    docker compose {{ compose }} pull
     docker compose {{ compose }} build --pull
     docker compose {{ compose }} up -d
 
