@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
@@ -13,6 +14,7 @@ services:
 
   web:
     build: .
+    restart: unless-stopped
     ports:
       # Local dev only; bound to loopback so the app is never exposed directly in
       # production. The prod overlay (docker-compose.proxy.yml) drops this and
