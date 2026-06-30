@@ -30,7 +30,7 @@ services:
       db:
         condition: service_healthy
     command: >
-      bash -c '
+      sh -c '
       if [ "$$USE_NGINX_PROXY" = "true" ] && [ -z "$$VIRTUAL_HOST" ]; then
         echo ""; echo "  ERROR: USE_NGINX_PROXY is set but docker-compose.proxy.yml not loaded."; echo "  Use: just up"; echo "";
         exit 1;

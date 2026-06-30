@@ -76,6 +76,17 @@ pip-freeze: ensure-env
 build: ensure-env
     docker compose {{ compose }} build
 
+# Back up the Postgres database to backups/ (timestamped)
+backup: ensure-env
+    @mkdir -p backups
+    docker compose {{ compose }} exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' > "backups/db-$(date +%Y%m%d-%H%M%S).sql"
+    @echo "✓ backup written to backups/"
+
+# Back up, then rebuild with the latest base image and recreate
+update: backup
+    docker compose {{ compose }} build --pull
+    docker compose {{ compose }} up -d
+
 # Lint Python files with ruff
 lint-python: ensure-env
     docker compose exec web ruff check .
