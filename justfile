@@ -82,10 +82,12 @@ backup: ensure-env
     docker compose {{ compose }} exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' > "backups/db-$(date +%Y%m%d-%H%M%S).sql"
     @echo "✓ backup written to backups/"
 
-# Back up, then refresh images (pulled + built) and recreate
+# Back up, then refresh images (pulled + built) and recreate.
+# --no-cache: force pip to re-resolve so the Django range pin (>=5.2,<5.3) pulls
+# patch releases on update (a cached requirements layer would freeze the version).
 update: backup
     docker compose {{ compose }} pull
-    docker compose {{ compose }} build --pull
+    docker compose {{ compose }} build --no-cache --pull
     docker compose {{ compose }} up -d
 
 # Lint Python files with ruff
