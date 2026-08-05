@@ -1,7 +1,7 @@
 {% extends 'calendar_app/base.html' %}
 {% load i18n %}
 {% load recurrence_utils %}
-{% block title %}{{ event.title }} - {{ SITE_NAME_PLAIN }}{% endblock %}
+{% block title %}{{ occurrence_title }} - {{ SITE_NAME_PLAIN }}{% endblock %}
 {% block content %}
     <div class="event-detail-container">
         <a href="{% url 'calendar' %}" class="back-link">&laquo; {% trans "Back to Calendar" %}</a>
@@ -47,7 +47,7 @@
             {% endif %}
             <h1>
                 {% if is_cancelled %}<del>{% endif %}
-                    {{ event.title }}
+                    {{ occurrence_title }}
                     {% if is_cancelled %}</del>{% endif %}
             </h1>
             {% if event.recurrence %}
@@ -72,10 +72,10 @@
                         <strong>{% trans "Location:" %}</strong> {{ event.location }}
                     </div>
                 {% endif %}
-                {% if event.description %}
+                {% if occurrence_description %}
                     <div class="info-row">
                         <strong>{% trans "Description:" %}</strong>
-                        <p>{{ event.description }}</p>
+                        <p>{{ occurrence_description }}</p>
                     </div>
                 {% endif %}
                 {% if max_participants %}

@@ -158,6 +158,40 @@ class RecurringOccurrenceTest(OccurrenceTestMixin, TestCase):
         self.assertEqual(occs[0]['start_time'], time(10, 0))
         self.assertFalse(occs[0]['time_changed'])
 
+    def test_title_and_description_override(self):
+        event = self._create_event(
+            date_val=date(2025, 6, 1),
+            recurrence=self._weekly_recurrence(date(2025, 6, 1)),
+        )
+        OccurrenceDetails.objects.create(
+            event=event,
+            occurrence_date=date(2025, 6, 8),
+            override_title='Mix 3 vs. Kochel',
+            override_description='Heimspiel',
+        )
+        occs = get_event_occurrences(event, date(2025, 6, 1), date(2025, 6, 30))
+        by_date = {o['date']: o for o in occs}
+        self.assertEqual(by_date[date(2025, 6, 8)]['title'], 'Mix 3 vs. Kochel')
+        self.assertEqual(by_date[date(2025, 6, 8)]['description'], 'Heimspiel')
+        # Every other occurrence keeps the parent event's text.
+        self.assertEqual(by_date[date(2025, 6, 1)]['title'], 'Test Event')
+        self.assertEqual(by_date[date(2025, 6, 15)]['title'], 'Test Event')
+
+    def test_blank_override_falls_back_to_event(self):
+        event = self._create_event(
+            date_val=date(2025, 6, 1),
+            recurrence=self._weekly_recurrence(date(2025, 6, 1)),
+        )
+        # A row created only to change the time must not blank out the title.
+        OccurrenceDetails.objects.create(
+            event=event,
+            occurrence_date=date(2025, 6, 8),
+            override_start_time=time(14, 0),
+        )
+        occs = get_event_occurrences(event, date(2025, 6, 1), date(2025, 6, 30))
+        june_8 = [o for o in occs if o['date'] == date(2025, 6, 8)][0]
+        self.assertEqual(june_8['title'], 'Test Event')
+
     def test_occurrence_guest_count(self):
         event = self._create_event(
             date_val=date(2025, 6, 1),

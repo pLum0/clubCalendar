@@ -187,8 +187,8 @@ def get_event_occurrences(event, start_date, end_date, calendar_user=None, rsvp_
 
             occ = {
                 "id": event.id,
-                "title": event.title,
-                "description": event.description,
+                "title": details.override_title if details and details.override_title else event.title,
+                "description": details.override_description if details and details.override_description else event.description,
                 "date": occ_date_only,
                 "start_time": start_time,
                 "end_time": end_time,
@@ -375,6 +375,8 @@ def event_detail(request, event_id):
 
     is_cancelled = False
     cancel_reason = ""
+    occurrence_title = event.title
+    occurrence_description = event.description
     start_time = event.start_time
     end_time = event.end_time
     time_changed = False
@@ -387,6 +389,10 @@ def event_detail(request, event_id):
             details = event.occurrence_details.get(occurrence_date=occurrence_date)
             is_cancelled = details.cancelled
             cancel_reason = details.reason
+            if details.override_title:
+                occurrence_title = details.override_title
+            if details.override_description:
+                occurrence_description = details.override_description
             if details.override_start_time:
                 start_time = details.override_start_time
                 if start_time != event.start_time:
@@ -465,6 +471,8 @@ def event_detail(request, event_id):
         "rsvps_by_status": rsvps_by_status,
         "is_cancelled": is_cancelled,
         "cancel_reason": cancel_reason,
+        "occurrence_title": occurrence_title,
+        "occurrence_description": occurrence_description,
         "start_time": start_time,
         "end_time": end_time,
         "start_time_str": start_time.strftime("%H:%M"),

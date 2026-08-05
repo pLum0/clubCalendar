@@ -19,7 +19,7 @@ class OccurrenceDetailsForm(forms.ModelForm):
 
     class Meta:
         model = OccurrenceDetails
-        fields = ['event', 'occurrence_select', 'occurrence_date', 'cancelled', 'reason', 'override_start_time', 'override_end_time', 'guests']
+        fields = ['event', 'occurrence_select', 'occurrence_date', 'cancelled', 'reason', 'override_title', 'override_description', 'override_start_time', 'override_end_time', 'guests']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -73,16 +73,16 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(OccurrenceDetails, site=custom_admin_site)
 class OccurrenceDetailsAdmin(admin.ModelAdmin):
     form = OccurrenceDetailsForm
-    list_display = ['event', 'occurrence_date', 'cancelled', 'override_start_time', 'override_end_time', 'reason']
+    list_display = ['event', 'occurrence_date', 'cancelled', 'override_title', 'override_start_time', 'override_end_time', 'reason']
     list_filter = ['occurrence_date', 'event', 'cancelled']
-    search_fields = ['event__title', 'reason']
+    search_fields = ['event__title', 'reason', 'override_title']
     date_hierarchy = 'occurrence_date'
     fieldsets = (
         ('Occurrence', {
             'fields': ('event', 'occurrence_select', 'occurrence_date')
         }),
         ('Options', {
-            'fields': ('cancelled', 'reason', 'override_start_time', 'override_end_time', 'guests')
+            'fields': ('cancelled', 'reason', 'override_title', 'override_description', 'override_start_time', 'override_end_time', 'guests')
         }),
     )
 

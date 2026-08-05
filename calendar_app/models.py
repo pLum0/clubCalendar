@@ -88,6 +88,8 @@ class OccurrenceDetails(models.Model):
     occurrence_date = models.DateField(help_text='The specific date of this occurrence')
     cancelled = models.BooleanField(default=False)
     reason = models.TextField(blank=True, help_text='Cancellation reason or general notice')
+    override_title = models.CharField(max_length=200, blank=True, help_text='Override default title (optional)')
+    override_description = models.TextField(blank=True, help_text='Override default description (optional)')
     override_start_time = models.TimeField(blank=True, null=True, help_text='Override default start time (optional)')
     override_end_time = models.TimeField(blank=True, null=True, help_text='Override default end time (optional)')
     guests = models.JSONField(default=list, blank=True, help_text='Guest RSVPs for this occurrence')

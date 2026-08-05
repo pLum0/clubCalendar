@@ -105,6 +105,32 @@ class EventDetailViewTest(TestCase):
         resp = self.client.get(self.url, {'date': 'invalid'})
         self.assertEqual(resp.status_code, 200)
 
+    def test_detail_shows_occurrence_title_override(self):
+        event = Event.objects.create(
+            title='Mix 3',
+            description='Training',
+            date=date(2025, 6, 1),
+            start_time=time(20, 0),
+            recurrence=Recurrence(rrules=[Rule(rec_module.WEEKLY)]),
+        )
+        OccurrenceDetails.objects.create(
+            event=event,
+            occurrence_date=date(2025, 6, 8),
+            override_title='Mix 3 vs. Kochel',
+            override_description='Heimspiel gegen TG Kochel',
+        )
+        url = _url(f'/event/{event.id}/')
+
+        resp = self.client.get(url, {'date': '2025-06-08'})
+        self.assertEqual(resp.context['occurrence_title'], 'Mix 3 vs. Kochel')
+        self.assertEqual(resp.context['occurrence_description'], 'Heimspiel gegen TG Kochel')
+        self.assertContains(resp, 'Mix 3 vs. Kochel')
+
+        # A different occurrence of the same event is untouched.
+        resp = self.client.get(url, {'date': '2025-06-15'})
+        self.assertEqual(resp.context['occurrence_title'], 'Mix 3')
+        self.assertEqual(resp.context['occurrence_description'], 'Training')
+
     def test_event_detail_nonexistent_event(self):
         resp = self.client.get(_url('/event/99999/'))
         self.assertEqual(resp.status_code, 404)
