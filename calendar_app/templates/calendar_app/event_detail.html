@@ -1,7 +1,7 @@
 {% extends 'calendar_app/base.html' %}
 {% load i18n %}
 {% load recurrence_utils %}
-{% block title %}{{ event.title }} - {{ SITE_NAME }}{% endblock %}
+{% block title %}{{ event.title }} - {{ SITE_NAME_PLAIN }}{% endblock %}
 {% block content %}
     <div class="event-detail-container">
         <a href="{% url 'calendar' %}" class="back-link">&laquo; {% trans "Back to Calendar" %}</a>

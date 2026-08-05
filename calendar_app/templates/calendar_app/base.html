@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>
-            {% block title %}{{ SITE_NAME }}{% endblock %}
+            {% block title %}{{ SITE_NAME_PLAIN }}{% endblock %}
         </title>
         <link rel="stylesheet" href="{% static 'calendar_app/css/style.css' %}">
         {% block extra_css %}{% endblock %}
@@ -16,7 +16,7 @@
             <nav>
                 <a href="{% url 'calendar' %}" class="logo">
                     {% if SITE_LOGO %}
-                        <img src="{{ SITE_LOGO }}" alt="{{ SITE_NAME|striptags }}" class="logo-img">
+                        <img src="{{ SITE_LOGO }}" alt="{{ SITE_NAME_PLAIN }}" class="logo-img">
                         <span class="logo-text">{{ SITE_NAME|safe }}</span>
                     {% else %}
                         {{ SITE_NAME|safe }}

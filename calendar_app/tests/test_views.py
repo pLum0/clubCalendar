@@ -4,10 +4,11 @@ from unittest.mock import patch
 import recurrence as rec_module
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from recurrence import Recurrence, Rule
 
 from calendar_app.models import RSVP, CalendarUser, Event, OccurrenceDetails, Tag
+from calendar_project.context_processors import _plain_site_name
 
 
 def _url(path):
@@ -274,3 +275,29 @@ class UpdateOccurrenceViewTest(TestCase):
     def test_get_rejected(self):
         resp = self.client.get(self.url)
         self.assertEqual(resp.status_code, 405)
+
+
+class SiteNamePlainTest(TestCase):
+    """SITE_NAME may carry <br /> for the two-line header; titles must stay plain text."""
+
+    def test_br_becomes_space(self):
+        self.assertEqual(
+            _plain_site_name('TSV Weilheim<br />Volleyball-Kalender'),
+            'TSV Weilheim Volleyball-Kalender',
+        )
+
+    def test_br_variants(self):
+        for raw in ('A<br>B', 'A<br/>B', 'A<BR />B', 'A<br />B'):
+            self.assertEqual(_plain_site_name(raw), 'A B', raw)
+
+    def test_plain_name_untouched(self):
+        self.assertEqual(_plain_site_name('Sports Club Calendar'), 'Sports Club Calendar')
+
+    @override_settings(SITE_NAME='TSV Weilheim<br />Volleyball-Kalender')
+    def test_title_has_no_literal_markup(self):
+        resp = self.client.get(_url('/'))
+        self.assertEqual(resp.status_code, 200)
+        html = resp.content.decode()
+        title = html.split('<title>')[1].split('</title>')[0]
+        self.assertNotIn('br', title)
+        self.assertIn('TSV Weilheim Volleyball-Kalender', title)
