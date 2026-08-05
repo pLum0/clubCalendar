@@ -174,14 +174,14 @@
                                                                 {{ event.start_time|time:"H:i" }}
                                                                 {% if event.cancelled %}</del>{% endif %}
                                                         </span>
+                                                        <div class="event-tags">
+                                                            {% for tag in event.tags %}<span class="mini-tag" style="background-color: {{ tag.color }}"></span>{% endfor %}
+                                                        </div>
                                                         <span class="event-title">
                                                             {% if event.cancelled %}<del>{% endif %}
                                                                 {{ event.title }}
                                                                 {% if event.cancelled %}</del>{% endif %}
                                                         </span>
-                                                        <div class="event-tags">
-                                                            {% for tag in event.tags %}<span class="mini-tag" style="background-color: {{ tag.color }}"></span>{% endfor %}
-                                                        </div>
                                                     </div>
                                                 </a>
                                             {% endfor %}
