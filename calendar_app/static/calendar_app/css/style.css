@@ -677,10 +677,18 @@ button:hover {
 }
 
 .event-title {
-    color: var(--color-mini-event);
-    white-space: nowrap;
+    display: -webkit-box;
     overflow: hidden;
+    color: var(--color-mini-event);
     text-overflow: ellipsis;
+
+    /* Wrap at spaces only — never mid-word, so single long words such as
+       "Freizeit" keep the ellipsis instead of an arbitrary or locale-dependent break. */
+    white-space: normal;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    min-width: 0;
 }
 
 .event-tags {
