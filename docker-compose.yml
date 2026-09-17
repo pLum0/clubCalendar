@@ -35,7 +35,7 @@ services:
         echo ""; echo "  ERROR: USE_NGINX_PROXY is set but docker-compose.proxy.yml not loaded."; echo "  Use: just up"; echo "";
         exit 1;
       fi;
-      exec gunicorn --bind 0.0.0.0:8000 --worker-class gthread --workers 1 --threads 8 --timeout 120 calendar_project.wsgi:application'
+      exec gunicorn --bind 0.0.0.0:8000 --worker-class gthread --workers 1 --threads 8 --timeout 300 calendar_project.wsgi:application'
 
 volumes:
   static_volume:

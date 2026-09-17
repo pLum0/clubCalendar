@@ -28,7 +28,12 @@ EXPOSE 8000
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
 # One worker, many threads: requests wait on a slow external HTTP call, not on
 # CPU, so threads are what buys concurrency here. Staying at a single worker
-# keeps the process-local sheet cache coherent -- a second worker would hold
-# its own copy and keep serving data a booking had just invalidated. The
-# timeout must outlast the longest outbound call plus its retries.
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--worker-class", "gthread", "--workers", "1", "--threads", "8", "--timeout", "120", "calendar_project.wsgi:application"]
+# keeps the sheet cache's in-process locks meaningful, so concurrent readers of
+# one week share a fetch instead of each starting their own.
+#
+# The timeout has to outlast the slowest request, not the slowest outbound call:
+# a booking makes two calls back to back and a removal three, each with its own
+# budget. Threads are what make a generous value cheap -- a request sitting on
+# one no longer holds up the others, so this only has to be high enough to still
+# catch a genuinely hung worker.
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--worker-class", "gthread", "--workers", "1", "--threads", "8", "--timeout", "300", "calendar_project.wsgi:application"]
