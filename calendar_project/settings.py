@@ -85,6 +85,17 @@ DATABASES = {
     }
 }
 
+# Cache entries have to outlive the worker process. An in-memory cache is also
+# private to each worker, so entries one worker stores or invalidates are
+# invisible to the others. Postgres is already a dependency, so the shared cache
+# table lives there rather than in a service of its own.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'django_cache',
+    }
+}
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',

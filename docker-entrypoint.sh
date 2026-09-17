@@ -8,6 +8,7 @@ done
 echo "PostgreSQL is available"
 
 python manage.py migrate --noinput
+python manage.py createcachetable
 python manage.py collectstatic --noinput
 
 if [ -n "$DJANGO_ADMIN_USERNAME" ] && [ -n "$DJANGO_ADMIN_EMAIL" ] && [ -n "$DJANGO_ADMIN_PASSWORD" ]; then
