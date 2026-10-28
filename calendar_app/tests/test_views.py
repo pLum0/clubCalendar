@@ -327,3 +327,62 @@ class SiteNamePlainTest(TestCase):
         title = html.split('<title>')[1].split('</title>')[0]
         self.assertNotIn('br', title)
         self.assertIn('TSV Weilheim Volleyball-Kalender', title)
+
+
+class EventsJsonTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.team = Tag.objects.create(name='Mix 3', color='#ff0000')
+        cls.other = Tag.objects.create(name='Damen', color='#00ff00')
+        cls.alice = CalendarUser.objects.create(name='Alice', team=cls.team)
+        cls.bob = CalendarUser.objects.create(name='Bob', team=cls.team)
+
+    def setUp(self):
+        self.client = Client()
+        self.url = _url('/api/events/')
+        self.day = date.today() + timedelta(days=3)
+
+    def test_match_with_rsvps_and_guest(self):
+        match = Event.objects.create(
+            title='Mix 3 vs. Oberammergau', date=self.day, start_time=time(19, 0), end_time=time(21, 0),
+            location='TSV-Halle', guests=[{'name': 'Gast', 'status': 'coming'}],
+        )
+        match.tags.add(self.team)
+        RSVP.objects.create(event=match, user=self.alice, occurrence_date=self.day, status='coming', comment='später')
+        RSVP.objects.create(event=match, user=self.bob, occurrence_date=self.day, status='not_coming')
+        other = Event.objects.create(title='Damen', date=self.day, start_time=time(18, 0))
+        other.tags.add(self.other)
+
+        data = self.client.get(self.url, {'tags': 'Mix 3'}).json()
+        self.assertEqual(len(data['events']), 1)
+        e = data['events'][0]
+        self.assertEqual((e['title'], e['date'], e['start_time'], e['end_time']),
+                         ('Mix 3 vs. Oberammergau', self.day.isoformat(), '19:00', '21:00'))
+        self.assertEqual(e['teams'], ['Mix 3'])
+        self.assertEqual([p['name'] for p in e['coming']], ['Alice', 'Gast'])
+        self.assertEqual(e['coming'][0]['comment'], 'später')
+        self.assertEqual([p['name'] for p in e['not_coming']], ['Bob'])
+        self.assertNotIn('id', e['coming'][0])
+
+    def test_recurring_occurrence_with_override(self):
+        r = Recurrence()
+        r.rrules.append(Rule(rec_module.WEEKLY, dtstart=datetime.combine(self.day, time.min)))
+        training = Event.objects.create(title='Mix 3', date=self.day, start_time=time(20, 0), recurrence=r)
+        training.tags.add(self.team)
+        OccurrenceDetails.objects.create(event=training, occurrence_date=self.day + timedelta(days=7),
+                                         cancelled=True, reason='Halle belegt')
+        RSVP.objects.create(event=training, user=self.alice, occurrence_date=self.day, status='maybe')
+
+        data = self.client.get(self.url, {'from': self.day.isoformat(), 'days': '8'}).json()
+        self.assertEqual([e['date'] for e in data['events']],
+                         [self.day.isoformat(), (self.day + timedelta(days=7)).isoformat()])
+        self.assertEqual([p['name'] for p in data['events'][0]['maybe']], ['Alice'])
+        self.assertTrue(data['events'][1]['cancelled'])
+        self.assertEqual(data['events'][1]['cancel_reason'], 'Halle belegt')
+
+    def test_bad_parameters(self):
+        self.assertEqual(self.client.get(self.url, {'from': 'morgen'}).status_code, 400)
+        self.assertEqual(self.client.get(self.url, {'days': 'viele'}).status_code, 400)
+
+    def test_get_only(self):
+        self.assertEqual(self.client.post(self.url).status_code, 405)

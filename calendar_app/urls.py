@@ -12,5 +12,6 @@ urlpatterns = [
     path('user/settings/', views.update_user_settings, name='update_user_settings'),
     path('preferences/', views.save_preferences, name='save_preferences'),
     path('upcoming/', views.upcoming_events, name='upcoming_events'),
+    path('api/events/', views.events_json, name='events_json'),
     path('admin-panel/', views.admin_wrapper, name='admin_wrapper'),
 ]

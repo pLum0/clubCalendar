@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.translation import get_language
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from .models import RSVP, CalendarUser, Event, OccurrenceDetails, Tag
 from .notifications import notify_rsvps_event_change, notify_waitlist_user
@@ -811,6 +811,66 @@ def upcoming_events(request):
         "tag_filter": ",".join(active_tags) if active_tags else "",
     }
     return render(request, "calendar_app/upcoming.html", context)
+
+
+@require_GET
+def events_json(request):
+    """Read-only, machine-readable occurrences with their RSVPs, e.g. for a voice assistant.
+
+    Query: tags=Team1,Team2 (default all teams), from=YYYY-MM-DD (default today), days=1..400 (default 60).
+    The same data the event pages show, without user ids.
+    """
+    try:
+        start_date = datetime.strptime(request.GET["from"], "%Y-%m-%d").date() if request.GET.get("from") else None
+        days = int(request.GET.get("days", 60))
+    except ValueError:
+        return JsonResponse({"error": "from must be YYYY-MM-DD, days a number"}, status=400)
+    start_date = start_date or timezone.now().date()
+    end_date = start_date + timedelta(days=max(1, min(days, 400)) - 1)
+
+    events = Event.objects.prefetch_related("tags", "occurrence_details").filter(
+        Q(date__range=(start_date, end_date), recurrence=None) | Q(recurrence__isnull=False, date__lte=end_date)
+    )
+    tags = [t.strip() for t in request.GET.get("tags", "").split(",") if t.strip()]
+    if tags:
+        events = events.filter(tags__name__in=tags).distinct()
+    events = list(events)
+
+    rsvps = defaultdict(list)
+    for r in (
+        RSVP.objects.filter(event__in=events, occurrence_date__range=(start_date, end_date))
+        .select_related("user__team")
+        .order_by("status_updated_at")
+    ):
+        rsvps[(r.event_id, r.occurrence_date)].append(r)
+
+    occurrences = []
+    for event in events:
+        for occ in get_event_occurrences(event, start_date, end_date, rsvp_data={"count_by_date": {}, "user_by_date": {}}):
+            people = {"coming": [], "maybe": [], "not_coming": []}
+            for r in rsvps[(event.id, occ["date"])]:
+                people[r.status].append({"name": r.user.name, "team": r.user.team.name, "comment": r.comment})
+            for g in get_guests(event, occ["date"]):
+                if g.get("status") in people:
+                    people[g["status"]].append({"name": g.get("name", ""), "team": None, "comment": "", "guest": True})
+            occurrences.append(
+                {
+                    "event_id": event.id,
+                    "date": occ["date"].isoformat(),
+                    "start_time": occ["start_time"].strftime("%H:%M"),
+                    "end_time": occ["end_time"].strftime("%H:%M") if occ["end_time"] else None,
+                    "title": occ["title"],
+                    "description": occ["description"],
+                    "location": occ["location"],
+                    "teams": [t.name for t in occ["tags"]],
+                    "cancelled": occ["cancelled"],
+                    "cancel_reason": occ["cancel_reason"],
+                    "max_participants": event.max_participants,
+                    **people,
+                }
+            )
+    occurrences.sort(key=lambda o: (o["date"], o["start_time"]))
+    return JsonResponse({"from": start_date.isoformat(), "to": end_date.isoformat(), "events": occurrences})
 
 
 @require_POST
