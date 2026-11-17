@@ -241,10 +241,12 @@ function openAdminModal(action) {
             </div>
             <div class="form-group">
                 <label for="statusReason">{% trans "Reason/Notice:" %}</label>
-                <textarea id="statusReason" rows="3">${currentReason}</textarea>
+                <textarea id="statusReason" rows="3"></textarea>
                 <p class="hint">{% trans "Optional. Shows as notice if not cancelled, or as cancellation reason if cancelled." %}</p>
             </div>
         `;
+        // set as a value, not inside the HTML string above (the reason is free text)
+        document.getElementById('statusReason').value = currentReason;
     } else if (action === 'time') {
         title.textContent = "{% trans "Change Time" %}";
         body.innerHTML = `
@@ -434,9 +436,14 @@ function showSuggestions(val) {
             .sort(function(a, b) { return a.value.toLowerCase().indexOf(lower) - b.value.toLowerCase().indexOf(lower); })
         : teamSuggestions;
     if (!matches.length) { acList.innerHTML = ''; acList.style.display = 'none'; return; }
-    acList.innerHTML = matches.map(function(s) {
-        return '<li data-value="' + s.value.replace(/"/g, '&quot;') + '">' + s.value + '</li>';
-    }).join('');
+    // Names come from users and guests: build the entries as DOM nodes (textContent / dataset),
+    // never as an HTML string, so a name like <img onerror=...> is shown as text, not run.
+    acList.replaceChildren.apply(acList, matches.map(function(s) {
+        var li = document.createElement('li');
+        li.dataset.value = s.value;
+        li.textContent = s.value;
+        return li;
+    }));
     acList.style.display = 'block';
     acList.querySelectorAll('li').forEach(function(li) {
         li.addEventListener('mousedown', function(e) {
