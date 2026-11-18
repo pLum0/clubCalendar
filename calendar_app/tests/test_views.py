@@ -303,6 +303,50 @@ class UpdateOccurrenceViewTest(TestCase):
         self.assertEqual(resp.status_code, 405)
 
 
+class UpdateOneOffOccurrenceViewTest(TestCase):
+    """The event page's cancel form also posts to update-occurrence for one-off events."""
+
+    def setUp(self):
+        self.client = Client()
+        User.objects.create_superuser('admin', 'admin@test.com', 'pass')
+        self.client.login(username='admin', password='pass')
+        self.event = Event.objects.create(title='Match', date=date(2025, 6, 15), start_time=time(20, 0))
+        self.url = _url(f'/event/{self.event.id}/update-occurrence/')
+        self.detail_url = _url(f'/event/{self.event.id}/')
+
+    @patch('calendar_app.views.notify_rsvps_event_change')
+    def test_cancel_one_off_shows_as_cancelled(self, mock_notify):
+        resp = self.client.post(self.url, {'occurrence_date': '2025-06-15', 'cancelled': 'true', 'reason': 'Rain'})
+        self.assertEqual(resp.status_code, 200)
+        self.event.refresh_from_db()
+        self.assertTrue(self.event.cancelled)
+        self.assertEqual(self.event.cancel_reason, 'Rain')
+        resp = self.client.get(self.detail_url, {'date': '2025-06-15'})
+        self.assertTrue(resp.context['is_cancelled'])
+        self.assertEqual(resp.context['cancel_reason'], 'Rain')
+        mock_notify.assert_called_once_with(self.event, date(2025, 6, 15), 'cancelled', 'Rain')
+
+    @patch('calendar_app.views.notify_rsvps_event_change')
+    def test_uncancel_one_off_cancelled_in_admin(self, mock_notify):
+        self.event.cancelled = True
+        self.event.cancel_reason = 'Rain'
+        self.event.save()
+        resp = self.client.post(self.url, {'occurrence_date': '2025-06-15', 'cancelled': 'false'})
+        self.assertEqual(resp.status_code, 200)
+        self.event.refresh_from_db()
+        self.assertFalse(self.event.cancelled)
+        resp = self.client.get(self.detail_url, {'date': '2025-06-15'})
+        self.assertFalse(resp.context['is_cancelled'])
+        mock_notify.assert_called_once_with(self.event, date(2025, 6, 15), 'uncancelled')
+
+    def test_detail_shows_existing_per_date_cancellation(self):
+        # Data written before the fix: only the per-date entry is cancelled.
+        OccurrenceDetails.objects.create(event=self.event, occurrence_date=self.event.date, cancelled=True, reason='Rain')
+        resp = self.client.get(self.detail_url, {'date': '2025-06-15'})
+        self.assertTrue(resp.context['is_cancelled'])
+        self.assertEqual(resp.context['cancel_reason'], 'Rain')
+
+
 class SiteNamePlainTest(TestCase):
     """SITE_NAME may carry <br /> for the two-line header; titles must stay plain text."""
 

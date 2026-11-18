@@ -143,6 +143,17 @@ def _check_waitlist_promotion(event, occurrence_date, cancelled_timestamp=None):
             notify_waitlist_user(entry, event, occurrence_date)
 
 
+def _one_off_cancel_state(event, details):
+    """Cancellation of a one-off event: its own flag (admin) or its per-date entry (event page)."""
+    details_reason = details.reason if details else ""
+    if event.cancelled:
+        return True, event.cancel_reason or details_reason
+    if details and details.cancelled:
+        return True, details_reason or event.cancel_reason
+    # Not cancelled: the reason, if any, is shown as a notice.
+    return False, details_reason or event.cancel_reason
+
+
 def get_event_occurrences(event, start_date, end_date, calendar_user=None, rsvp_data=None):
     occurrences = []
     if event.recurrence:
@@ -220,21 +231,28 @@ def get_event_occurrences(event, start_date, end_date, calendar_user=None, rsvp_
 
             guest_coming = sum(1 for g in (event.guests or []) if g.get("status") == "coming")
             rsvp_count += guest_coming
+            # One-off events can also carry a per-date OccurrenceDetails entry: the
+            # cancel/notice/time form on the event page writes one for every event.
+            details = next((od for od in event.occurrence_details.all() if od.occurrence_date == event.date), None)
+            is_cancelled, reason = _one_off_cancel_state(event, details)
+            start_time = details.override_start_time if details and details.override_start_time else event.start_time
+            end_time = details.override_end_time if details and details.override_end_time else event.end_time
             occ = {
                 "id": event.id,
-                "title": event.title,
-                "description": event.description,
+                "title": details.override_title if details and details.override_title else event.title,
+                "description": details.override_description if details and details.override_description else event.description,
                 "date": event.date,
-                "start_time": event.start_time,
-                "end_time": event.end_time,
+                "start_time": start_time,
+                "end_time": end_time,
                 "location": event.location,
                 "tags": event.tags.all(),
                 "is_recurring": False,
                 "original_event": event,
                 "rsvp_count": rsvp_count,
                 "user_rsvp_status": user_rsvp_status,
-                "cancelled": event.cancelled,
-                "cancel_reason": event.cancel_reason,
+                "cancelled": is_cancelled,
+                "cancel_reason": reason,
+                "time_changed": start_time != event.start_time or end_time != event.end_time,
             }
             occurrences.append(occ)
     return occurrences
@@ -381,28 +399,30 @@ def event_detail(request, event_id):
     end_time = event.end_time
     time_changed = False
 
-    if event.cancelled and occurrence_date == event.date and not event.is_recurring:
-        is_cancelled = True
-        cancel_reason = event.cancel_reason
-    elif event.is_recurring:
-        try:
-            details = event.occurrence_details.get(occurrence_date=occurrence_date)
-            is_cancelled = details.cancelled
-            cancel_reason = details.reason
-            if details.override_title:
-                occurrence_title = details.override_title
-            if details.override_description:
-                occurrence_description = details.override_description
-            if details.override_start_time:
-                start_time = details.override_start_time
-                if start_time != event.start_time:
-                    time_changed = True
-            if details.override_end_time:
-                end_time = details.override_end_time
-                if end_time != event.end_time:
-                    time_changed = True
-        except OccurrenceDetails.DoesNotExist:
-            pass
+    details = None
+    if event.is_recurring or occurrence_date == event.date:
+        # One-off events can carry a per-date entry too: the event page's form writes one for every event.
+        details = next((od for od in event.occurrence_details.all() if od.occurrence_date == occurrence_date), None)
+
+    if not event.is_recurring and occurrence_date == event.date:
+        is_cancelled, cancel_reason = _one_off_cancel_state(event, details)
+    elif details:
+        is_cancelled = details.cancelled
+        cancel_reason = details.reason
+
+    if details:
+        if details.override_title:
+            occurrence_title = details.override_title
+        if details.override_description:
+            occurrence_description = details.override_description
+        if details.override_start_time:
+            start_time = details.override_start_time
+            if start_time != event.start_time:
+                time_changed = True
+        if details.override_end_time:
+            end_time = details.override_end_time
+            if end_time != event.end_time:
+                time_changed = True
 
     calendar_user = user_prefs.get("calendar_user")
 
@@ -920,6 +940,12 @@ def update_occurrence(request, event_id):
     except OccurrenceDetails.DoesNotExist:
         pass
 
+    is_one_off_date = not event.is_recurring and occurrence_date == event.date
+    if is_one_off_date and event.cancelled:
+        # Cancelled in the admin: that is the state the event page showed.
+        old_cancelled = True
+        old_reason = event.cancel_reason or old_reason
+
     time_changed_flag = False
     if start_time_str or end_time_str:
         time_changed_flag = start_time != old_start_time or end_time != old_end_time
@@ -936,6 +962,13 @@ def update_occurrence(request, event_id):
     details, created = OccurrenceDetails.objects.update_or_create(
         event=event, occurrence_date=occurrence_date, defaults=defaults
     )
+
+    if is_one_off_date:
+        # Keep the event's own fields in sync, so the admin shows the same state
+        # and un-cancelling here also clears a cancellation made in the admin.
+        event.cancelled = cancelled
+        event.cancel_reason = reason
+        event.save(update_fields=["cancelled", "cancel_reason", "updated_at"])
 
     if cancelled and not old_cancelled:
         notify_rsvps_event_change(event, occurrence_date, "cancelled", reason)

@@ -73,6 +73,22 @@ class NonRecurringOccurrenceTest(OccurrenceTestMixin, TestCase):
         self.assertTrue(occs[0]['cancelled'])
         self.assertEqual(occs[0]['cancel_reason'], 'Rain')
 
+    def test_cancelled_via_occurrence_details(self):
+        # The event page's cancel form stores a per-date entry, also for one-off events.
+        event = self._create_event(date_val=date(2025, 6, 15))
+        OccurrenceDetails.objects.create(event=event, occurrence_date=event.date, cancelled=True, reason='Rain')
+        occs = get_event_occurrences(event, date(2025, 6, 1), date(2025, 6, 30))
+        self.assertTrue(occs[0]['cancelled'])
+        self.assertEqual(occs[0]['cancel_reason'], 'Rain')
+
+    def test_time_override_via_occurrence_details(self):
+        event = self._create_event(date_val=date(2025, 6, 15))
+        OccurrenceDetails.objects.create(event=event, occurrence_date=event.date, override_start_time=time(11, 0))
+        occs = get_event_occurrences(event, date(2025, 6, 1), date(2025, 6, 30))
+        self.assertEqual(occs[0]['start_time'], time(11, 0))
+        self.assertTrue(occs[0]['time_changed'])
+        self.assertFalse(occs[0]['cancelled'])
+
     def test_rsvp_count_without_prefetch(self):
         event = self._create_event(date_val=date(2025, 6, 15))
         user1 = self._create_user('U1')
